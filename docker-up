@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker-compose up -d
+docker exec -it --user laravel fcontrol-api-app /bin/bash
