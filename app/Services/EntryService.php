@@ -20,15 +20,17 @@ class EntryService
             $arrOrderBy = explode(':', $data['order_by']);
             $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'desc' : 'asc');
         }
+
+        // dd($arrOrderBy);
         
         if ($data['start_period'] && $data['end_period']) {
-            $query->whereDate('start_date', '>=', $data['start_period'] . '-01')
-                ->whereDate('start_date', '<=', $data['end_period'] . '-01');
+            $query->whereDate($arrOrderBy[1], '>=', $data['start_period'] . '-01')
+                ->whereDate($arrOrderBy[1], '<=', $data['end_period'] . '-01');
         }
 
         if ($data['start_period'] && $data['end_period']) {
-            $query->whereDate('start_date', '>=', $data['start_period'] . '-01')
-                ->whereDate('start_date', '<=', $data['end_period'] . '-01');
+            $query->whereDate($arrOrderBy[1], '>=', $data['start_period'] . '-01')
+                ->whereDate($arrOrderBy[1], '<=', $data['end_period'] . '-01');
         }
 
         if ($data['type']) {
