@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Aristides\Helpers\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +33,10 @@ class EntryResource extends JsonResource
             'bank_account' => new BankAccountResource($this->whenLoaded('bankAccount')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'credit_card' => new CreditCardResource($this->whenLoaded('creditCard')),
+            
+            // Custom
+            // 'amount_sum' => $this->amount_sum ? Helpers::formatMoneyToReal($this->amount_sum) : null,
+            'month_extension' => $this->start_date ? month_extension($this->start_date) : null,
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Entry;
 use Illuminate\Http\Request;
 use App\Services\EntryService;
 use App\Http\Resources\EntryResource;
+use Illuminate\Support\Facades\DB;
 
 class EntryController extends Controller
 {
@@ -18,18 +19,21 @@ class EntryController extends Controller
     
     public function index(Request $request)
     {
-        $query = Entry::with('category')->orderBy('due_date');
+        return EntryResource::collection($this->entryService->list($request->all()));
+    }
 
-        if ($request->type) {
-            $type = $request->type === 'expense' ? 'expense' : 'income';
-            $query->where('type', $type);
-        }
-
-        return EntryResource::collection($query->paginate());    
+    public function show(string $id)
+    {
+        return response()->json($this->entryService->findById((int) $id), 200);
     }
 
     public function store(Request $request)
     {
         return response()->json($this->entryService->store($request->all()), 201);
+    }
+
+    public function destroy(string $id)
+    {
+        return response()->json($this->entryService->delete((int) $id), 200);
     }
 }

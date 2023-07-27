@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Aristides\Helpers\Helpers;
 use App\Tenant\Traits\TenantTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -54,8 +57,8 @@ class Entry extends Model
         return $this->belongsTo(User::class);
     }
 
-    // public function setAmountAttribute(string $value): void
-    // {
-    //     $this->attributes['amount'] = Helpers::formatMoneyToDatabase($value);
-    // }
+    public function setAmountAttribute(string $value): void
+    {
+        $this->attributes['amount'] = Helpers::formatMoneyToDatabase($value);
+    }
 }
