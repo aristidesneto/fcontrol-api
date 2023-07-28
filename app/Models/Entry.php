@@ -32,9 +32,10 @@ class Entry extends Model
         'observation'
     ];
 
-    protected $dates = [
-        'due_date',
-        'payday',
+    protected $casts = [
+        'due_date' => 'date',
+        'payday' => 'date',
+        'start_date' => 'date',
     ];
 
     public function bankAccount(): BelongsTo

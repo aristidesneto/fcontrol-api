@@ -22,10 +22,10 @@ class EntryResource extends JsonResource
             'amount' => $this->amount,
             'parcel' => $this->parcel,
             'total_parcel' => $this->total_parcel,
-            'due_date' => $this->due_date,
-            'payday' => is_null($this->payday) ? null : $this->payday,
+            'due_date' => is_null($this->due_date) ? null : $this->due_date->format('d/m/Y'),
+            'payday' => is_null($this->payday) ? null : $this->payday->format('d/m/Y'),
             'is_recurring' => $this->is_recurring,
-            'start_date' => is_null($this->start_date) ? null : $this->start_date,
+            'start_date' => is_null($this->start_date) ? null : $this->start_date->format('d/m/Y'),
             'sequence' => $this->sequence,
             'observation' => $this->observation,
             'created_at' => $this->created_at,
@@ -36,7 +36,7 @@ class EntryResource extends JsonResource
             
             // Custom
             // 'amount_sum' => $this->amount_sum ? Helpers::formatMoneyToReal($this->amount_sum) : null,
-            'month_extension' => $this->start_date ? month_extension($this->start_date) : null,
+            'month_extension' => is_null($this->start_date) ? null : month_extension($this->start_date),
         ];
     }
 }
