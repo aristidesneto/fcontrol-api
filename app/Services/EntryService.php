@@ -137,21 +137,22 @@ class EntryService
         // $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
         $start_date = $data['start_date'] = Carbon::createFromFormat('m/Y', $data['start_date'])->firstOfMonth();
         $data['parcel'] = 0;
-
-
+        
+        
         if ($data['is_recurring'] === true) {
             for ($i = 1; $i <= 120; ++$i) { // 10 anos
                 Entry::create($data);
-
+                
                 $data['start_date'] = $start_date->copy()->addMonthNoOverflow($i);
             }
-
+            
             return [
                 "status" => "success",
                 "message" => "Income created successfully",
             ];
         }
-
+        
+        // dd($data);
         Entry::create($data);
 
         return [

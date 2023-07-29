@@ -22,7 +22,7 @@ class EntryFactory extends Factory
     {
         $types = ['expense', 'income'];
 
-        $due_date = Carbon::now()->addDays(random_int(1, 30));
+        $date = random_int(2023, 2023) . '/' . random_int(1, 12) . '/' . random_int(1, 28);
 
         $category = Category::withoutGlobalScopes()->where('type', Arr::random($types))->inRandomOrder()->first();
 
@@ -33,12 +33,12 @@ class EntryFactory extends Factory
             'bank_account_id' => random_int(1, 5),
             'type' => $category->type,
             'title' => $this->faker->name,
-            'amount' => $this->faker->numberBetween(10, 200),
+            'amount' => $this->faker->numberBetween(100, 2000),
             'parcel' => 1,
-            'due_date' => $due_date,
-            'payday' => Carbon::parse($due_date)->addDay(),
+            'due_date' => $date,
+            'payday' => Carbon::parse($date)->addDay(),
             'is_recurring' => false,
-            'start_date' => Carbon::now(),
+            'start_date' => $date,
         ];
     }
 }
