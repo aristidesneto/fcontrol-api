@@ -32,6 +32,11 @@ class EntryController extends Controller
         return response()->json($this->entryService->store($request->all()), 201);
     }
 
+    public function update(Request $request, string $id)
+    {
+        return response()->json($this->entryService->update($request->all(), (int) $id), 200);
+    }
+
     public function destroy(string $id)
     {
         return response()->json($this->entryService->delete((int) $id), 200);

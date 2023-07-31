@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('color');
             $table->enum('type', ['income', 'expense'])->default('income');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean('status');
             $table->timestamps();
             $table->softDeletes();
 

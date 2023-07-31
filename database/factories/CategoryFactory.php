@@ -18,7 +18,6 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $types = ['expense', 'income'];
-        $status = ['active', 'inactive'];
 
         return [
             'user_id' => '1',
@@ -26,7 +25,7 @@ class CategoryFactory extends Factory
             'description' => $this->faker->word(3),
             'color' => '#CCCAEE',
             'type' => Arr::random($types),
-            'status' => Arr::random($status),
+            'status' => true,
         ];
     }
 }

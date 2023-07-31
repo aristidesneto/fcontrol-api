@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
-use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
@@ -18,28 +18,15 @@ class CategoryController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->total_page ?? 10;
-        
-        $query = Category::orderBy('type')->orderby('name');
-
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->type && $request->type !== 'all') {
-            $type = $request->type === 'expense' ? 'expense' : 'income';
-            $query->where('type', $type);
-        }
-
-        return CategoryResource::collection($query->paginate($paginate));
+        return CategoryResource::collection($this->categoryService->list($request->all()));
     }
 
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        return response()->json($this->categoryService->store($request->all()), 200);
+        return response()->json($this->categoryService->store($request->all()), 201);
     }
 
-    public function update(Request $request, string $id)
+    public function update(CategoryRequest $request, string $id)
     {
         return response()->json($this->categoryService->update($request->all(), (int) $id), 200);
     }

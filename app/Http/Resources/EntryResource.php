@@ -26,6 +26,8 @@ class EntryResource extends JsonResource
             'payday' => is_null($this->payday) ? null : $this->payday->format('d/m/Y'),
             'is_recurring' => $this->is_recurring,
             'start_date' => is_null($this->start_date) ? null : $this->start_date->format('d/m/Y'),
+            'start_date_month' => is_null($this->start_date) ? null : $this->start_date->format('m'),
+            'start_date_year' => is_null($this->start_date) ? null : $this->start_date->format('Y'),
             'sequence' => $this->sequence,
             'observation' => $this->observation,
             'created_at' => $this->created_at,

@@ -2,27 +2,23 @@
 
 namespace App\Services;
 
-use App\Http\Resources\EntryResource;
 use Carbon\Carbon;
 use App\Models\Entry;
 use Aristides\Helpers\Helpers;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\EntryResource;
 
 class EntryService
 {
     public function list(array $data)
     {
-        // dd($data);
         $query = Entry::with('category');
-        // $query = Entry::with('category')->select("*", DB::raw("sum(amount) as amount_sum"));
 
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
             $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'desc' : 'asc');
         }
 
-        // dd($arrOrderBy);
-        
         if ($data['start_period'] && $data['end_period']) {
             $query->whereDate($arrOrderBy[1], '>=', $data['start_period'] . '-01')
                 ->whereDate($arrOrderBy[1], '<=', $data['end_period'] . '-01');
@@ -38,13 +34,7 @@ class EntryService
             $query->where('type', $type);
         }
         
-        // if ($data['group_by']) {
-        //     $query->groupBy('start_date');
-        // }
-        
-        // dd($entry->toArray());
-        
-        return $query->paginate();
+        return $query->get();
     }
 
     public function store(array $data)
@@ -61,7 +51,6 @@ class EntryService
         $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
         $due_date = $data['due_date'] = Carbon::createFromFormat('d/m/Y', $data['due_date']);
         $data['payday'] = isset($data['payday']) ? Carbon::createFromFormat('d/m/Y', $data['payday']) : null;
-        // $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
 
         // Recorrente
         if ($data['is_recurring'] === true) {
@@ -134,11 +123,10 @@ class EntryService
     protected function createIncome(array $data)
     {
         $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
-        // $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
-        $start_date = $data['start_date'] = Carbon::createFromFormat('m/Y', $data['start_date'])->firstOfMonth();
+        $inputMonth = '01/' . $data['start_date']['month'] . '/' . $data['start_date']['year'];
+        $start_date = $data['start_date'] = Carbon::createFromFormat('d/m/Y', $inputMonth)->firstOfMonth();
         $data['parcel'] = 0;
-        
-        
+
         if ($data['is_recurring'] === true) {
             for ($i = 1; $i <= 120; ++$i) { // 10 anos
                 Entry::create($data);
@@ -148,7 +136,7 @@ class EntryService
             
             return [
                 "status" => "success",
-                "message" => "Income created successfully",
+                "message" => "Receita cadastrada com sucesso",
             ];
         }
         
@@ -157,7 +145,7 @@ class EntryService
 
         return [
             "status" => "success",
-            "message" => "Income created successfully",
+            "message" => "Receita cadastrada com sucesso",
         ];
     }
 
@@ -167,20 +155,28 @@ class EntryService
         return new EntryResource(Entry::find($id));
     }
 
-    public function delete(int $id)
+    public function update(array $data, int $id): array
     {
-        $entry = Entry::find($id);
+        $inputMonth = '01/' . $data['start_date']['month'] . '/' . $data['start_date']['year'];
+        $data['start_date'] = Carbon::createFromFormat('d/m/Y', $inputMonth)->firstOfMonth();
 
-        if ($entry->delete()) {
-            return [
-                "status" => "success",
-                "message" => "Income removed successfully"
-            ];
-        }
+        $entry = Entry::find($id)->update($data);
 
         return [
-            "status" => "error",
-            "message" => "Error to remove entry"
+            "message" => "Registro atualizado com sucesso",
+            "data" => $entry,
         ];
+    }
+
+    public function delete(int $id)
+    {
+        $entry = Entry::find($id)->delete();
+
+        if ($entry) {
+            return [
+                "status" => "success",
+                "message" => "Receita removida com sucesso"
+            ];
+        }
     }
 }

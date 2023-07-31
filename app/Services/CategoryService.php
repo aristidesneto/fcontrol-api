@@ -3,44 +3,59 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Http\Resources\CategoryResource;
 
 class CategoryService
 {
-    public function store(array $data)
+    public function list(array $data)
     {
-        Category::create($data);
+        $paginate = $data['total_page'] ?? 10;
+        
+        $query = Category::orderBy('type')->orderby('name');
+
+        if (isset($data['status']) && $data['status'] !== 'all') {
+            $query->where('status', $data['status']);
+        }
+
+        if (isset($data['type']) && $data['type'] !== 'all') {
+            $type = $data['type'] === 'expense' ? 'expense' : 'income';
+            $query->where('type', $type);
+        }
+
+        return $query->paginate($paginate);
+    }
+
+    public function store(array $data): array
+    {
+        $category = Category::create($data);
 
         return [
-            "status" => "success",
-            "message" => "Income created successfully",
+            "message" => "Categoria cadastrada com sucesso",
+            "data" => new CategoryResource($category)
         ];
     }
 
-    public function update(array $data, int $id)
+    public function update(array $data, int $id): array
     {
-        $data['status'] = $data['status'] ? 'active' : 'inactive';
+        $data['status'] = boolval($data['status']);
+
         $category = Category::find($id)->update($data);
 
         return [
-            "message" => "Update successfully",
+            "message" => "Categoria atualizada com sucesso",
             "data" => $category,
         ];
     }
 
     public function delete(int $id)
     {
-        $category = Category::find($id);
+        $category = Category::find($id)->delete();
 
-        if ($category->delete()) {
+        if ($category) {
             return [
-                "status" => "success",
-                "message" => "Income removed successfully"
+                "message" => "Categoria removida com sucesso",
+                "data" => []
             ];
         }
-
-        return [
-            "status" => "error",
-            "message" => "Error to remove category"
-        ];
     }
 }

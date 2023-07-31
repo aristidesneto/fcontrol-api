@@ -19,7 +19,7 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
             'color' => $this->color,
             'type' => $this->type,
-            'status' => $this->status,
+            'status' => boolval($this->status),
             'created_at' => $this->created_at,
             'user' => new UserResource($this->whenLoaded('user')),
         ];
