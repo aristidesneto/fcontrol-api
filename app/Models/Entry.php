@@ -57,8 +57,8 @@ class Entry extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function setAmountAttribute(string $value): void
-    {
-        $this->attributes['amount'] = Helpers::formatMoneyToDatabase($value);
-    }
+    // public function setAmountAttribute(string $value): void
+    // {
+    //     $this->attributes['amount'] = Helpers::formatMoneyToDatabase($value);
+    // }
 }

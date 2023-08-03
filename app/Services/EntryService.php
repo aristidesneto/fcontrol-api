@@ -12,7 +12,7 @@ class EntryService
 {
     public function list(array $data)
     {
-        $query = Entry::with('category');
+        $query = Entry::with('category', 'creditCard');
 
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
@@ -48,8 +48,10 @@ class EntryService
 
     protected function createExpense(array $data)
     {
+        $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
         $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
         $due_date = $data['due_date'] = Carbon::createFromFormat('d/m/Y', $data['due_date']);
+        $data['start_date'] = isset($data['start_date']) ? Carbon::createFromFormat('d/m/Y', $data['start_date']) : null;
         $data['payday'] = isset($data['payday']) ? Carbon::createFromFormat('d/m/Y', $data['payday']) : null;
 
         // Recorrente
@@ -69,19 +71,19 @@ class EntryService
 
             return [
                 "status" => "success",
-                "message" => "Income created successfully",
+                "message" => "Despesa cadastrada com sucesso",
             ];
         }
 
-        // dd($data);
-
+        
         // Cartão de crédito
         if (isset($data['credit_card_id']) && ! is_null($data['credit_card_id'])) {
             $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
-
+                        
             $amountParcel = round($data['amount'] / $totalParcel, 2);
             $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
-
+            
+            // dd($data);
             // dd($amountParcel, $data['amount']);
 
             $data['total_parcel'] = $totalParcel;
@@ -98,7 +100,7 @@ class EntryService
 
             return [
                 "status" => "success",
-                "message" => "Income created successfully",
+                "message" => "Despesa cadastrada com sucesso",
             ];
         }
 
@@ -106,12 +108,14 @@ class EntryService
         $data['credit_card_id'] = null;
         $data['parcel'] = '0';
 
+        //dd($data);
+
         // Cria para 1 parcela
-        Entry::create($data);
+        $entry = Entry::create($data);
 
         return [
-            "status" => "success",
-            "message" => "Income created successfully",
+            "message" => "Despesa cadastrada com sucesso",
+            "data" => $entry,
         ];
     }
 
@@ -122,10 +126,13 @@ class EntryService
 
     protected function createIncome(array $data)
     {
+        $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
         $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
         $inputMonth = '01/' . $data['start_date']['month'] . '/' . $data['start_date']['year'];
         $start_date = $data['start_date'] = Carbon::createFromFormat('d/m/Y', $inputMonth)->firstOfMonth();
         $data['parcel'] = 0;
+
+        // dd($data);
 
         if ($data['is_recurring'] === true) {
             for ($i = 1; $i <= 120; ++$i) { // 10 anos
@@ -157,6 +164,7 @@ class EntryService
 
     public function update(array $data, int $id): array
     {
+        $data['amount'] = Helpers::formatMoneyToDatabase($data['amount']);
         $inputMonth = '01/' . $data['start_date']['month'] . '/' . $data['start_date']['year'];
         $data['start_date'] = Carbon::createFromFormat('d/m/Y', $inputMonth)->firstOfMonth();
 

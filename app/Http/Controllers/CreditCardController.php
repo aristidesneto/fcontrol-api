@@ -10,6 +10,6 @@ class CreditCardController extends Controller
 {
     public function index()
     {
-        return CreditCardResource::collection(CreditCard::orderBy('name')->paginate());
+        return CreditCardResource::collection(CreditCard::orderBy('name')->get());
     }
 }

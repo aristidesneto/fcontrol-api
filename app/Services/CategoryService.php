@@ -22,6 +22,10 @@ class CategoryService
             $query->where('type', $type);
         }
 
+        if (isset($data['paginate']) && $data['paginate'] == false) {
+            return $query->get();
+        }
+
         return $query->paginate($paginate);
     }
 
