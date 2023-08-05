@@ -47,15 +47,7 @@ class AuthController extends Controller
 
         $cookie = $this->getCookieDetails($token);
 
-        return response()->json(['user' => new UserResource($user), 'token' => $token], 200)
-            ->withCookie(
-                $cookie['name'],
-                $cookie['value'],
-                $cookie['minutes'],
-                $cookie['path'],
-                $cookie['domain'],
-                $cookie['secure']
-            );
+        return response()->json(['user' => new UserResource($user), 'token' => $token], 200);
     }
 
     public function logout(Request $request): JsonResponse
@@ -74,7 +66,7 @@ class AuthController extends Controller
             'value' => $token,
             'minutes' => 1440,
             'path' => null,
-            'domain' => 'localhost',
+            'domain' => 'homelab.com',
             'secure' => true, // for production
             // 'secure' => null, // for localhost
             'httponly' => false,

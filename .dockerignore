@@ -1,0 +1,11 @@
+.dockerignore
+.env
+.env.example
+.editorconfig
+docker
+tests
+vendor
+docker-compose.yaml
+docker-up
+Dockerfile
+README.md
