@@ -36,17 +36,17 @@ class EntryRequest extends FormRequest
                 Rule::requiredIf($id === null),
                 Rule::in(config('agenda.types'))
             ],
-            'title' => ['string', 'max:255'],
+            'title' => ['string', 'max:120'],
             'is_recurring' => ['required', 'boolean'],
             'start_date' => ['nullable', 'date:Y-m-d'],
             'category_id' => ['required', new ExistsInModel(Category::class)],
-            'credit_card_id' => ['filled', new ExistsInModel(CreditCard::class)],
-            'bank_account_id' => ['filled', new ExistsInModel(BankAccount::class)],
+            'credit_card_id' => ['nullable', new ExistsInModel(CreditCard::class)],
+            'bank_account_id' => ['nullable', new ExistsInModel(BankAccount::class)],
             'amount' => ['required', 'decimal:2'],
             'due_date' => ['nullable', 'date:Y-m-d'],
             'payday' => ['nullable', 'date:Y-m-d'],
             'parcel' => ['numeric'],
-            'observation' => ['nullable', 'string', 'max:255']
+            'observation' => ['nullable', 'string', 'max:160']
         ];
     }
 
