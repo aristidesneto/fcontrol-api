@@ -24,8 +24,8 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|max:120',
-            'color' => 'required',
-            'type' => Rule::in(['income', 'expense']),
+            'color' => 'required|size:7',
+            'type' => ['required', Rule::in(config('agenda.types'))],
             'status' => 'required|boolean',
         ];
     }

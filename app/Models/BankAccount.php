@@ -11,6 +11,16 @@ class BankAccount extends Model
 {
     use HasFactory, TenantTrait;
 
+    protected $fillable = [
+        'user_id',
+        'name',
+        'number',
+        'best_date',
+        'due_date',
+        'limit',
+        'status'
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
