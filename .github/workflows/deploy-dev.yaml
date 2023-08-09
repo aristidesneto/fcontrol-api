@@ -1,0 +1,36 @@
+name: Deploy Development
+
+on: [workflow_dispatch]
+
+concurrency: deploy_dev
+
+jobs:
+  deploy:
+    name: Development
+    runs-on: ubuntu-22.04
+    environment:
+      name: test
+
+    env:
+      php-version: 8.2
+
+    steps:
+      - name: Checkout Develop
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+
+      - name: Getting last commit SHA
+        id: last-commit
+        run: echo "sha=$(git log -n1 --pretty=%H)" >> "$GITHUB_OUTPUT"
+
+      - name: Setting up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.php-version }}
+
+      - name: Docker build
+        run: |
+          echo "docker build"
+          echo "docker push"
+
