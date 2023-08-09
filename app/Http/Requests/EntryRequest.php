@@ -29,8 +29,13 @@ class EntryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->segment(3);
+
         return [
-            'type' => ['required', Rule::in(config('agenda.types'))],
+            'type' => [
+                Rule::requiredIf($id === null),
+                Rule::in(config('agenda.types'))
+            ],
             'title' => ['string', 'max:255'],
             'is_recurring' => ['required', 'boolean'],
             'start_date' => ['nullable', 'date:Y-m-d'],
@@ -41,7 +46,7 @@ class EntryRequest extends FormRequest
             'due_date' => ['nullable', 'date:Y-m-d'],
             'payday' => ['nullable', 'date:Y-m-d'],
             'parcel' => ['numeric'],
-            'observation' => ['string', 'max:255']
+            'observation' => ['nullable', 'string', 'max:255']
         ];
     }
 
