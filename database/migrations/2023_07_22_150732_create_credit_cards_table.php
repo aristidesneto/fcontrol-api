@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\User;
+use App\Models\CreditCard;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -27,6 +29,17 @@ return new class extends Migration
                 ->references('id')
                 ->on('users');
         });
+
+        $user = User::where('email', 'aristidesbneto@gmail.com')->first();
+
+        CreditCard::create([
+            'name' => 'Nubank',
+            'user_id' => $user->id,
+            'number' => '1234',
+            'best_date' => '3',
+            'due_date' => '10',
+            'limit' => '1000',            
+        ]);
     }
 
     /**

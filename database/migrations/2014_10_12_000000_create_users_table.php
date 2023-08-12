@@ -25,6 +25,12 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        User::create([
+            'name' => 'Aristides Neto',
+            'email' => 'aristidesbneto@gmail.com',
+            'password' => Hash::make('password')            
+        ]);
     }
 
     /**

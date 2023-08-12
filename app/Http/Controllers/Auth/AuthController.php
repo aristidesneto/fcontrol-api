@@ -45,7 +45,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('Laravel Password Grant Client')->plainTextToken;
 
-        $cookie = $this->getCookieDetails($token);
+        // $cookie = $this->getCookieDetails($token);
 
         return response()->json(['user' => new UserResource($user), 'token' => $token], 200);
     }
@@ -59,18 +59,18 @@ class AuthController extends Controller
         return response()->json([], 200)->withCookie($cookie);
     }
 
-    private function getCookieDetails(string $token): array
-    {
-        return [
-            'name' => 'cf_token',
-            'value' => $token,
-            'minutes' => 1440,
-            'path' => null,
-            'domain' => 'homelab.com',
-            'secure' => true, // for production
-            // 'secure' => null, // for localhost
-            'httponly' => false,
-            'samesite' => false,
-        ];
-    }
+    // private function getCookieDetails(string $token): array
+    // {
+    //     return [
+    //         'name' => 'cf_token',
+    //         'value' => $token,
+    //         'minutes' => 1440,
+    //         'path' => null,
+    //         'domain' => 'homelab.com',
+    //         'secure' => true, // for production
+    //         // 'secure' => null, // for localhost
+    //         'httponly' => false,
+    //         'samesite' => false,
+    //     ];
+    // }
 }

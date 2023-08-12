@@ -4,7 +4,13 @@ WORKDIR /app
 
 COPY . .
 
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader
+
+FROM php:8.2.8-cli-alpine3.18 as cli
+
+WORKDIR /app
+
+COPY --from=build /app /app
 
 FROM php:8.2-fpm
 

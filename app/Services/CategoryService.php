@@ -53,13 +53,21 @@ class CategoryService
 
     public function delete(int $id)
     {
-        $category = Category::find($id)->delete();
+        $category = Category::with('entries')->find($id);
 
-        if ($category) {
-            return [
-                "message" => "Categoria removida com sucesso",
-                "data" => []
-            ];
+        if (! $category) {
+            abort(404, "Registro não encontrado");
         }
+
+        if ($category->entries->count() > 0) {
+            abort(422, "Erro! Essa categoria não pode ser removida, pois está sendo usada em um lançamento");            
+        }
+
+        $category->delete();
+        
+        return [
+            "message" => "Categoria removida com sucesso",
+            "data" => []
+        ];
     }
 }
