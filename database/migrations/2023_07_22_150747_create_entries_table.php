@@ -29,7 +29,6 @@ return new class extends Migration
             $table->integer('sequence')->nullable()->comment('Agrupamento de parcelas recorrentes');
             $table->string('observation')->nullable();
             $table->timestamps();
-            $table->softDeletes();
 
             $table->foreign('user_id')
                 ->references('id')

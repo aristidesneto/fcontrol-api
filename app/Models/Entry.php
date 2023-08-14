@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Entry extends Model
 {
-    use HasFactory, TenantTrait, SoftDeletes;
+    use HasFactory, TenantTrait;
 
     protected $fillable = [
         'user_id',

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('balance', 10, 2)->nullable()->comment('Saldo bancário');
             $table->timestamps();
-            $table->softDeletes();
 
             $table->foreign('user_id')
                 ->references('id')

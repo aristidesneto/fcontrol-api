@@ -51,7 +51,7 @@ class CategoryService
         ];
     }
 
-    public function delete(int $id)
+    public function delete(int $id): array
     {
         $category = Category::with('entries')->find($id);
 

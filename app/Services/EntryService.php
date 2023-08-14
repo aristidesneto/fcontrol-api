@@ -5,7 +5,6 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Entry;
 use Aristides\Helpers\Helpers;
-use Illuminate\Support\Facades\DB;
 use App\Http\Resources\EntryResource;
 
 class EntryService
@@ -14,19 +13,16 @@ class EntryService
     {
         $query = Entry::with('category', 'creditCard');
 
+        // dd($data);
+
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
-            $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'desc' : 'asc');
+            $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'asc' : 'desc');
         }
 
         if ($data['start_period'] && $data['end_period']) {
-            $query->whereDate($arrOrderBy[1], '>=', $data['start_period'] . '-01')
-                ->whereDate($arrOrderBy[1], '<=', $data['end_period'] . '-01');
-        }
-
-        if ($data['start_period'] && $data['end_period']) {
-            $query->whereDate($arrOrderBy[1], '>=', $data['start_period'] . '-01')
-                ->whereDate($arrOrderBy[1], '<=', $data['end_period'] . '-01');
+            $query->whereDate('due_date', '>=', $data['start_period'])
+                ->whereDate('due_date', '<=', $data['end_period']);
         }
 
         if ($data['type']) {
@@ -61,7 +57,7 @@ class EntryService
 
             // dd($data);
 
-            for ($i = 1; $i <= 120; ++$i) { // 10 anos
+            for ($i = 1; $i <= 60; ++$i) { // 5 anos
                 Entry::create($data);
                 $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
             }
@@ -128,7 +124,7 @@ class EntryService
         $data['parcel'] = 0;
 
         if ($data['is_recurring'] === true) {
-            for ($i = 1; $i <= 120; ++$i) { // 10 anos
+            for ($i = 1; $i <= 60; ++$i) { // 5 anos
                 Entry::create($data);
                 
                 $data['start_date'] = $start_date->copy()->addMonthNoOverflow($i);
@@ -139,8 +135,7 @@ class EntryService
                 "message" => "Receita cadastrada com sucesso",
             ];
         }
-        
-        // dd($data);
+
         Entry::create($data);
 
         return [
@@ -164,15 +159,21 @@ class EntryService
         ];
     }
 
-    public function delete(int $id)
+    public function delete(int $id): array
     {
-        $entry = Entry::find($id)->delete();
+        $entry = Entry::find($id);
 
-        if ($entry) {
-            return [
-                "status" => "success",
-                "message" => "Receita removida com sucesso"
-            ];
+        if (! $entry) {
+            abort(404, "Registro não encontrado");
         }
+
+        $type = config('agenda.type_names.' . $entry->type);
+
+        $entry->delete();
+
+        return [
+            "status" => "success",
+            "message" => "$type removida com sucesso"
+        ];
     }
 }

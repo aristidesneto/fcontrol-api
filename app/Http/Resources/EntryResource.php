@@ -38,7 +38,7 @@ class EntryResource extends JsonResource
             
             // Custom
             // 'amount_sum' => $this->amount_sum ? Helpers::formatMoneyToReal($this->amount_sum) : null,
-            'month_extension' => is_null($this->start_date) ? null : month_extension($this->start_date),
+            'month_extension' => is_null($this->due_date) ? null : month_extension($this->due_date),
         ];
     }
 }

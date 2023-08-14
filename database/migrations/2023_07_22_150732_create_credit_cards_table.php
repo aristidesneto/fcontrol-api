@@ -23,7 +23,6 @@ return new class extends Migration
             $table->decimal('limit', 10, 2);
             $table->boolean('status')->default(true);
             $table->timestamps();
-            $table->softDeletes();
 
             $table->foreign('user_id')
                 ->references('id')
