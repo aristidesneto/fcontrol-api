@@ -22,10 +22,14 @@ jobs:
       run: |
         docker login registry.gitlab.com --username ${{ secrets.GITLAB_USERNAME }} --password ${{ secrets.GITLAB_PASSWORD }}
 
-    - name: Build the Docker image
+    - name: Docker build image
       run: |
-        make build
-  
+        make docker-build
+
+    - name: Docker push image
+      run: |
+        make docker-push
+
     # - name: Copy .env
     #   run: php -r "file_exists('.env') || copy('.env.example', '.env');"
   
