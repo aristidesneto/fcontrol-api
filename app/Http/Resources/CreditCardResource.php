@@ -22,6 +22,7 @@ class CreditCardResource extends JsonResource
             'due_date' => $this->due_date,
             'limit' => $this->limit,
             'status' => $this->status,
+            'main_card' => $this->main_card,
             'created_at' => $this->created_at,
             'user' => new UserResource($this->whenLoaded('user')),
         ];

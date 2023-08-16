@@ -159,6 +159,23 @@ class EntryService
         ];
     }
 
+    public function payday(array $data, int $id)
+    {
+        $entry = Entry::find($id);
+
+        if (! $entry) {
+            abort(404, "Registro não encontrado");
+        }
+
+        $entry->update($data);
+
+        return [
+            "status" => "success",
+            "message" => "Despesa paga com sucesso"
+        ];
+
+    }
+
     public function delete(int $id): array
     {
         $entry = Entry::find($id);

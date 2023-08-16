@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\EntryRequest;
 use App\Models\Entry;
 use Illuminate\Http\Request;
 use App\Services\EntryService;
-use App\Http\Resources\EntryResource;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\EntryRequest;
+use App\Http\Resources\EntryResource;
+use App\Http\Requests\EntryPaydayRequest;
 
 class EntryController extends Controller
 {
@@ -36,6 +37,11 @@ class EntryController extends Controller
     public function update(EntryRequest $request, string $id)
     {
         return response()->json($this->entryService->update($request->all(), (int) $id), 200);
+    }
+
+    public function payday(EntryPaydayRequest $request, string $id)
+    {
+        return response()->json($this->entryService->payday($request->only(['payday', 'observation']), (int) $id), 200);
     }
 
     public function destroy(string $id)

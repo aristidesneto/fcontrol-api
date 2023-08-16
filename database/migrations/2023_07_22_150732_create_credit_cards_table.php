@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('due_date')->comment('Dia do vencimento');
             $table->decimal('limit', 10, 2);
             $table->boolean('status')->default(true);
+            $table->boolean('main_card')->default(false);
             $table->timestamps();
 
             $table->foreign('user_id')
@@ -37,7 +38,8 @@ return new class extends Migration
             'number' => '1234',
             'best_date' => '3',
             'due_date' => '10',
-            'limit' => '1000',            
+            'limit' => '1000',
+            'main_card' => '1'       
         ]);
     }
 

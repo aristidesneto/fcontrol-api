@@ -21,5 +21,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('credit-cards', CreditCardController::class);
     Route::apiResource('entries', EntryController::class);
+    Route::put('entries/payday/{id}', [EntryController::class, 'payday']);
     Route::apiResource('users', UserController::class);
 });
