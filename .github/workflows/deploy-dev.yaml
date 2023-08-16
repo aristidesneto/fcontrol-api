@@ -15,12 +15,12 @@ jobs:
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
       with:
         php-version: '8.2'
-
-    - name: Getting last commit SHA
-      id: last-commit
-      run: echo "sha=$(git log -n1 --pretty=%H)" >> "$GITHUB_OUTPUT"
           
     - uses: actions/checkout@v3
+
+    - name: Gitlab authentication
+      run: |
+        docker login registry.gitlab.com --username ${{ secrets.GITLAB_USERNAME }} --password ${{ secrets.GITLAB_PASSWORD }}
 
     - name: Build the Docker image
       run: |
