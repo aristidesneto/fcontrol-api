@@ -24,7 +24,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        echo "docker build . --file Dockerfile --tag my-image-name:${{ steps.last-commit.outputs.sha }}"
+        make build
   
     # - name: Copy .env
     #   run: php -r "file_exists('.env') || copy('.env.example', '.env');"
