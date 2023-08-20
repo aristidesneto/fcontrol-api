@@ -16,9 +16,9 @@ class BankAccountSeeder extends Seeder
     {
         foreach (User::get() as $user) {
             BankAccount::factory()
-                ->count(5)
+                ->count(2)
                 ->create([
-                    'user_id' => $user->id
+                    'user_id' => $user->uuid
                 ]);
         }
     }

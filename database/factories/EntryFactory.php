@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\BankAccount;
 use Carbon\Carbon;
-use App\Models\Category;
 use App\Models\User;
+use App\Models\Category;
+use App\Models\CreditCard;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,10 +30,11 @@ class EntryFactory extends Factory
         $category = Category::withoutGlobalScopes()->where('type', Arr::random($types))->inRandomOrder()->first();
 
         return [
-            'user_id' => $category->user_id,
-            'category_id' => $category->id,
-            'credit_card_id' => random_int(1, 2),
-            'bank_account_id' => random_int(1, 5),
+            'uuid' => Str::uuid()->toString(),
+            'user_id' => User::factory(),
+            'category_id' => Category::factory(),
+            'credit_card_id' => CreditCard::factory(),
+            'bank_account_id' => BankAccount::factory(),
             'type' => $category->type,
             'title' => $this->faker->name,
             'amount' => $this->faker->numberBetween(100, 2000),

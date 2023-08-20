@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             CreditCardSeeder::class,
-            // BankAccountSeeder::class,
-            // EntrySeeder::class,
+            BankAccountSeeder::class,
+            EntrySeeder::class,
         ]);
     }
 }

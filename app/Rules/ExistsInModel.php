@@ -11,7 +11,7 @@ class ExistsInModel implements ValidationRule
 
     protected string $column;
 
-    public function __construct(string $modelName, string $column = 'id')
+    public function __construct(string $modelName, string $column = 'uuid')
     {
         $this->modelName = $modelName;
 

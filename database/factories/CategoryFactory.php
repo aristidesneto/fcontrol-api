@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,9 +22,9 @@ class CategoryFactory extends Factory
         $types = ['expense', 'income'];
 
         return [
-            'user_id' => '1',
+            'uuid' => Str::uuid()->toString(),
+            'user_id' => User::factory(),
             'name' => $this->faker->name,
-            'description' => $this->faker->word(3),
             'color' => '#CCCAEE',
             'type' => Arr::random($types),
             'status' => true,

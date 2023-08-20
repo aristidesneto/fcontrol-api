@@ -1,10 +1,11 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('avatar')->nullable();
@@ -26,11 +28,12 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        User::create([
-            'name' => 'Aristides Neto',
-            'email' => 'aristidesbneto@gmail.com',
-            'password' => Hash::make('password')            
-        ]);
+        // User::create([
+        //     'uuid' => Str::uuid()->toString(),
+        //     'name' => 'Aristides Neto',
+        //     'email' => 'aristidesbneto@gmail.com',
+        //     'password' => Hash::make('password')            
+        // ]);
     }
 
     /**

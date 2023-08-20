@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->uuid('uuid')->unique();
+            $table->uuid('user_id')->index();
             $table->string('name');
             $table->decimal('balance', 10, 2)->nullable()->comment('Saldo bancário');
             $table->timestamps();
 
             $table->foreign('user_id')
-                ->references('id')
+                ->references('uuid')
                 ->on('users');
         });
     }

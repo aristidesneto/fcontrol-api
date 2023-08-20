@@ -12,6 +12,7 @@ class BankAccount extends Model
     use HasFactory, TenantTrait;
 
     protected $fillable = [
+        'uuid',
         'user_id',
         'name',
         'number',

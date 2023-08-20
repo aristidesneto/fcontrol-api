@@ -75,9 +75,6 @@ class EntryService
                         
             $amountParcel = round($data['amount'] / $totalParcel, 2);
             $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
-            
-            // dd($data);
-            // dd($amountParcel, $data['amount']);
 
             $data['total_parcel'] = $totalParcel;
             $data['bank_account_id'] = null;
@@ -146,12 +143,12 @@ class EntryService
 
     public function findById(int $id)
     {
-        return new EntryResource(Entry::find($id));
+        return new EntryResource(Entry::where('uuid', $id)->first());
     }
 
     public function update(array $data, int $id): array
     {
-        $entry = Entry::find($id)->update($data);
+        $entry = Entry::where('uuid', $id)->first()->update($data);
 
         return [
             "message" => "Registro atualizado com sucesso",
@@ -161,7 +158,7 @@ class EntryService
 
     public function payday(array $data, int $id)
     {
-        $entry = Entry::find($id);
+        $entry = Entry::where('uuid', $id)->first();
 
         if (! $entry) {
             abort(404, "Registro não encontrado");
@@ -178,7 +175,7 @@ class EntryService
 
     public function delete(int $id): array
     {
-        $entry = Entry::find($id);
+        $entry = Entry::where('uuid', $id)->first();
 
         if (! $entry) {
             abort(404, "Registro não encontrado");

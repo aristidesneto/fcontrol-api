@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('entries', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('category_id')->nullable();
-            $table->unsignedBigInteger('credit_card_id')->nullable();
-            $table->unsignedBigInteger('bank_account_id')->nullable();
+            $table->uuid('uuid')->unique();
+            $table->uuid('user_id')->index();
+            $table->uuid('category_id')->index()->nullable();
+            $table->uuid('credit_card_id')->index()->nullable();
+            $table->uuid('bank_account_id')->index()->nullable();
             $table->enum('type', ['income', 'expense'])->default('expense');
             $table->string('title')->nullable()->comment('Título do lançamento');
             $table->decimal('amount', 10, 2);
@@ -31,19 +32,19 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')
-                ->references('id')
+                ->references('uuid')
                 ->on('users');
 
             $table->foreign('category_id')
-                ->references('id')
+                ->references('uuid')
                 ->on('categories');
 
             $table->foreign('credit_card_id')
-                ->references('id')
+                ->references('uuid')
                 ->on('credit_cards');
 
             $table->foreign('bank_account_id')
-                ->references('id')
+                ->references('uuid')
                 ->on('bank_accounts');
         });
     }
