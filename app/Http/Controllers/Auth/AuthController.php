@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Validator;
@@ -15,11 +16,11 @@ class AuthController extends Controller
 {
     public function me(): JsonResponse
     {
-        $user = User::where('email', auth()->user()->email)->first();
-
-        if (! $user) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Usuário não autenticado'], 401);
         }
+        
+        $user = User::where('email', auth()->user()->email)->first();
 
         return response()->json(['user' => new UserResource($user)], 200);
     }

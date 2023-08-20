@@ -13,9 +13,9 @@ use App\Http\Controllers\EntryController;
 Route::post('login', [AuthController::class, 'login'])->name('login.api');
 // Route::post('register', [AuthController::class, 'register'])->name('register.api');
 
+Route::get('authenticated/me', [AuthController::class, 'me'])->name('me.api');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('authenticated/me', [AuthController::class, 'me'])->name('me.api');
     
     Route::apiResource('bank-accounts', BankAccountController::class);
     Route::apiResource('categories', CategoryController::class);
