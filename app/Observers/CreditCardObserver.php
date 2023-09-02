@@ -9,7 +9,6 @@ class CreditCardObserver
 {
     public function creating(CreditCard $creditCard): void
     {
-        $creditCard->uuid = Str::uuid()->toString();
-        $creditCard->user_id = auth()->user()->uuid;
+        $creditCard->user_id = auth()->user()->id;
     }
 }

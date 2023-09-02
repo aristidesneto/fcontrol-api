@@ -55,8 +55,8 @@ class EntryRequest extends FormRequest
         $this->merge([    
             'start_date' => $this->setStartDate($this->start_date),
             'amount' => Helpers::formatMoneyToDatabase($this->amount),
-            'due_date' => $this->due_date ? Carbon::createFromFormat('d/m/Y', $this->due_date) : null,
-            'payday' => $this->payday ? Carbon::createFromFormat('d/m/Y', $this->payday) : null,
+            'due_date' => $this->due_date ? Carbon::createFromFormat('Y-m-d', $this->due_date) : null,
+            'payday' => $this->payday ? Carbon::createFromFormat('Y-m-d', $this->payday) : null,
             'is_recurring' => $this->is_recurring == '1' ? true : false,
         ]);
     }
@@ -71,6 +71,6 @@ class EntryRequest extends FormRequest
             return Carbon::createFromFormat('Y-m', $value['year'] . '-' . $value['month'])->firstOfMonth();
         }
         
-        return Carbon::createFromFormat('d/m/Y', $value);        
+        return Carbon::createFromFormat('Y-m-d', $value);        
     }
 }

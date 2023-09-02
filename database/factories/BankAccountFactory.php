@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\User;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +18,6 @@ class BankAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => Str::uuid()->toString(),
             'user_id' => User::factory(),
             'name' => $this->faker->name,
             'balance' => $this->faker->numberBetween(100, 10000),

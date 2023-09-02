@@ -43,7 +43,7 @@ class CategoryService
     {
         $data['status'] = boolval($data['status']);
 
-        $category = Category::where('uuid', $id)->first()->update($data);
+        $category = Category::where('id', $id)->first()->update($data);
 
         return [
             "message" => "Categoria atualizada com sucesso",

@@ -16,24 +16,16 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('avatar')->nullable();
             $table->boolean('status')->default(true);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->timestamp('email_verified_at', 6)->nullable();
+            $table->string('password', 100);
+            $table->string('timezone', 100)->nullable();
             $table->rememberToken();
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamps(6);
         });
-
-        // User::create([
-        //     'uuid' => Str::uuid()->toString(),
-        //     'name' => 'Aristides Neto',
-        //     'email' => 'aristidesbneto@gmail.com',
-        //     'password' => Hash::make('password')            
-        // ]);
     }
 
     /**

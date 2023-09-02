@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
 use App\Models\Entry;
-use Aristides\Helpers\Helpers;
 use App\Http\Resources\EntryResource;
 
 class EntryService
@@ -12,8 +10,6 @@ class EntryService
     public function list(array $data)
     {
         $query = Entry::with('category', 'creditCard');
-
-        // dd($data);
 
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
@@ -141,14 +137,25 @@ class EntryService
         ];
     }
 
-    public function findById(int $id)
+    public function show(string $id)
     {
-        return new EntryResource(Entry::where('uuid', $id)->first());
+        return new EntryResource($this->findById($id));
     }
 
-    public function update(array $data, int $id): array
+    public function findById(string $id)
     {
-        $entry = Entry::where('uuid', $id)->first()->update($data);
+        $entry = Entry::find((int) $id);
+
+        if (! $entry) {
+            abort(404, 'Registro não encontrado');
+        }
+
+        return $entry;
+    }
+
+    public function update(array $data, string $id): array
+    {
+        $entry = $this->findById($id)->update($data);
 
         return [
             "message" => "Registro atualizado com sucesso",
@@ -156,30 +163,19 @@ class EntryService
         ];
     }
 
-    public function payday(array $data, int $id)
+    public function payday(array $data, string $id)
     {
-        $entry = Entry::where('uuid', $id)->first();
-
-        if (! $entry) {
-            abort(404, "Registro não encontrado");
-        }
-
-        $entry->update($data);
+        $this->findById($id)->update($data);
 
         return [
             "status" => "success",
             "message" => "Despesa paga com sucesso"
         ];
-
     }
 
-    public function delete(int $id): array
+    public function delete(string $id): array
     {
-        $entry = Entry::where('uuid', $id)->first();
-
-        if (! $entry) {
-            abort(404, "Registro não encontrado");
-        }
+        $entry = $this->findById($id);
 
         $type = config('agenda.type_names.' . $entry->type);
 

@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\User;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +22,6 @@ class CreditCardFactory extends Factory
         $best_date = abs($due_data - 7);
 
         return [
-            'uuid' => Str::uuid()->toString(),
             'user_id' => User::factory(),
             'name' => $this->faker->name,
             'number' => $this->faker->numberBetween(1000, 9999),

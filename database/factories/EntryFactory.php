@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\CreditCard;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,7 +29,6 @@ class EntryFactory extends Factory
         $category = Category::withoutGlobalScopes()->where('type', Arr::random($types))->inRandomOrder()->first();
 
         return [
-            'uuid' => Str::uuid()->toString(),
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
             'credit_card_id' => CreditCard::factory(),

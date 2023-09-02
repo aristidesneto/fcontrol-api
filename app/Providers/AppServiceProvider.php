@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Database\Query\Grammars\MySqlGrammar;
 use App\Models\Entry;
 use App\Models\Category;
 use App\Models\CreditCard;
 use App\Observers\EntryObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\CreditCardObserver;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,5 +34,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Schema::defaultStringLength(191);
+        
+        DB::connection()->setQueryGrammar(new MySqlGrammar);
     }
 }

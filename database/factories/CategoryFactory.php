@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +21,6 @@ class CategoryFactory extends Factory
         $types = ['expense', 'income'];
 
         return [
-            'uuid' => Str::uuid()->toString(),
             'user_id' => User::factory(),
             'name' => $this->faker->name,
             'color' => '#CCCAEE',

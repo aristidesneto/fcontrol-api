@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
             'name' => 'Administrador',
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
+            'timezone' => 'America/Sao_Paulo',
         ]);
         
         User::factory(1)->create();

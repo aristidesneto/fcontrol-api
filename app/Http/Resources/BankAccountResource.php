@@ -15,7 +15,7 @@ class BankAccountResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->uuid,
+            'id' => $this->id,
             'name' => $this->name,
             'balance' => $this->balance,
             'created_at' => $this->created_at,

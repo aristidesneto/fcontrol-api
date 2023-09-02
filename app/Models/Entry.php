@@ -14,7 +14,6 @@ class Entry extends Model
     use HasFactory, TenantTrait;
 
     protected $fillable = [
-        'uuid',
         'user_id',
         'category_id',
         'credit_card_id',

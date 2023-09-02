@@ -9,7 +9,6 @@ class EntryObserver
 {
     public function creating(Entry $entry): void
     {
-        $entry->uuid = Str::uuid()->toString();
-        $entry->user_id = auth()->user()->uuid;
+        $entry->user_id = auth()->user()->id;
     }
 }

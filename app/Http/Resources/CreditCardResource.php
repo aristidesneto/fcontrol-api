@@ -15,11 +15,12 @@ class CreditCardResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->uuid,
+            'id' => $this->id,
             'name' => $this->name,
             'number' => $this->number,
             'best_date' => $this->best_date,
             'due_date' => $this->due_date,
+            'next_due_date' => calculate_due_date($this->due_date, $this->best_date),
             'limit' => $this->limit,
             'status' => $this->status,
             'main_card' => $this->main_card,

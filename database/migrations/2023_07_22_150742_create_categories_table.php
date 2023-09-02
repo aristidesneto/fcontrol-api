@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use App\Models\Category;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -16,17 +15,17 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
-            $table->uuid('user_id')->index();
+            $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('color');
             $table->enum('type', ['income', 'expense'])->default('income');
             $table->boolean('status');
-            $table->timestamps();
+            $table->timestamps(6);
 
             $table->foreign('user_id')
-                ->references('uuid')
-                ->on('users');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
@@ -69,7 +68,6 @@ return new class extends Migration
 
         foreach ($categories as $item) {
             Category::create([
-                'uuid' => Str::uuid()->toString(),
                 'user_id' => $user->id,
                 'name' => $item['name'],
                 'color' => $item['color'],

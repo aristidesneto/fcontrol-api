@@ -47,8 +47,7 @@ class CategorySeeder extends Seeder
         foreach (User::get() as $user) {
             foreach ($categories as $item) {
                 Category::create([
-                    'uuid' => Str::uuid()->toString(),
-                    'user_id' => $user->uuid,
+                    'user_id' => $user->id,
                     'name' => $item['name'],
                     'color' => $item['color'],
                     'type' => $item['type'],
