@@ -10,40 +10,44 @@ use App\Http\Requests\EntryPaydayRequest;
 
 class EntryController extends Controller
 {
-    protected EntryService $entryService;
+    protected EntryService $service;
 
-    public function __construct(EntryService $entryService)
+    public function __construct(EntryService $service)
     {
-        $this->entryService = $entryService;
+        $this->service = $service;
     }
     
     public function index(Request $request)
     {
-        return EntryResource::collection($this->entryService->list($request->all()));
+        return EntryResource::collection($this->service->list($request->all()));
     }
 
     public function show(string $id)
     {
-        return response()->json($this->entryService->show($id), 200);
+        return new EntryResource($this->service->show($id));
     }
 
     public function store(EntryRequest $request)
     {
-        return response()->json($this->entryService->store($request->all()), 201);
+        return EntryResource::make($this->service->store($request->all()))
+            ->response($request)
+            ->setStatusCode(201);
     }
 
     public function update(EntryRequest $request, string $id)
     {
-        return response()->json($this->entryService->update($request->all(), $id), 200);
+        return new EntryResource($this->service->update($request->all(), $id));
     }
 
     public function payday(EntryPaydayRequest $request, string $id)
     {
-        return response()->json($this->entryService->payday($request->only(['payday', 'observation']), $id), 200);
+        return response()->json($this->service->payday($request->only(['payday', 'observation']), $id), 200);
     }
 
     public function destroy(string $id)
     {
-        return response()->json($this->entryService->delete($id), 200);
+        $this->service->delete($id);
+
+        return response()->json([], 204);
     }
 }

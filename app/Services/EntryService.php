@@ -4,12 +4,23 @@ namespace App\Services;
 
 use App\Models\Entry;
 use App\Http\Resources\EntryResource;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntryService
 {
-    public function list(array $data)
+    public function list(array $data): LengthAwarePaginator
     {
-        $query = Entry::with('category', 'creditCard');
+        // Defaults
+        $type = 'income';
+        $fieldSearchDefault = 'start_date';
+
+        if (isset($data['type']) && $data['type'] === 'expense') {
+            $type = 'expense';
+            $fieldSearchDefault = 'due_date';
+        }        
+
+        $query = Entry::with('category', 'creditCard')
+            ->entryType($type);
 
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
@@ -17,16 +28,11 @@ class EntryService
         }
 
         if ($data['start_period'] && $data['end_period']) {
-            $query->whereDate('due_date', '>=', $data['start_period'])
-                ->whereDate('due_date', '<=', $data['end_period']);
-        }
-
-        if ($data['type']) {
-            $type = $data['type'] === 'expense' ? 'expense' : 'income';
-            $query->where('type', $type);
-        }
+            $query->whereDate($fieldSearchDefault, '>=', $data['start_period'])
+                ->whereDate($fieldSearchDefault, '<=', $data['end_period']);
+        }        
         
-        return $query->get();
+        return $query->paginate();
     }
 
     public function store(array $data)
@@ -40,150 +46,133 @@ class EntryService
 
     protected function createExpense(array $data)
     {
-        
-        $due_date = $data['due_date'];
-
-        // Recorrente
         if ($data['is_recurring'] === true) {
-            $sequence = $this->getSequence();
-            $data['sequence'] = $sequence ? $sequence + 1 : 1;
-            $data['bank_account_id'] = null;
-            $data['credit_card_id'] = null;
-            $data['parcel'] = 0;
-
-            // dd($data);
-
-            for ($i = 1; $i <= 60; ++$i) { // 5 anos
-                Entry::create($data);
-                $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
-            }
-
-            return [
-                "status" => "success",
-                "message" => "Despesa cadastrada com sucesso",
-            ];
+            $this->saveRecurrent($data);
         }
-
         
-        // Cartão de crédito
         if (isset($data['credit_card_id']) && ! is_null($data['credit_card_id'])) {
-            $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
-                        
-            $amountParcel = round($data['amount'] / $totalParcel, 2);
-            $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
-
-            $data['total_parcel'] = $totalParcel;
-            $data['bank_account_id'] = null;
-
-            for ($i = 1; $i <= $totalParcel; ++$i) {
-                $data['parcel'] = $i;
-                $data['amount'] = $i === (int) $totalParcel ? $amountParcel - $difference : $amountParcel;
-                // dd($data);
-                Entry::create($data);
-
-                $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
-            }
-
-            return [
-                "status" => "success",
-                "message" => "Despesa cadastrada com sucesso",
-            ];
+            $this->saveCreditCard($data);
         }
 
+        $this->saveGeneral($data);        
+    }
+
+    protected function saveRecurrent(array $data)
+    {
+        $data['sequence'] = $this->getSequence();
         $data['bank_account_id'] = null;
         $data['credit_card_id'] = null;
-        $data['parcel'] = '0';
-
-        //dd($data);
-
-        // Cria para 1 parcela
-        $entry = Entry::create($data);
-
-        return [
-            "message" => "Despesa cadastrada com sucesso",
-            "data" => $entry,
-        ];
-    }
-
-    protected function getSequence()
-    {
-        return Entry::max('sequence');
-    }
-
-    protected function createIncome(array $data)
-    {
-        $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
-        $start_date = $data['start_date'];
         $data['parcel'] = 0;
+        $due_date = $data['due_date'];
 
-        if ($data['is_recurring'] === true) {
-            for ($i = 1; $i <= 60; ++$i) { // 5 anos
-                Entry::create($data);
-                
-                $data['start_date'] = $start_date->copy()->addMonthNoOverflow($i);
-            }
-            
-            return [
-                "status" => "success",
-                "message" => "Receita cadastrada com sucesso",
-            ];
+        for ($i = 1; $i <= 60; ++$i) { // 5 anos
+            $entry = Entry::create($data);
+            $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
         }
 
-        Entry::create($data);
-
-        return [
-            "status" => "success",
-            "message" => "Receita cadastrada com sucesso",
-        ];
+        return Entry::where('sequence', $entry->sequence)
+            ->orderBy('id', 'ASC')
+            ->first();
     }
 
-    public function show(string $id)
+    protected function saveCreditCard(array $data)
     {
-        return new EntryResource($this->findById($id));
-    }
+        $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
+        $due_date = $data['due_date'];      
+        $amountParcel = round($data['amount'] / $totalParcel, 2);
+        $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
 
-    public function findById(string $id)
-    {
-        $entry = Entry::find((int) $id);
+        $data['total_parcel'] = $totalParcel;
+        $data['bank_account_id'] = null;
 
-        if (! $entry) {
-            abort(404, 'Registro não encontrado');
+        for ($i = 1; $i <= $totalParcel; ++$i) {
+            $data['parcel'] = $i;
+            $data['amount'] = $i === (int) $totalParcel ? $amountParcel - $difference : $amountParcel;
+
+            $entry = Entry::create($data);
+            $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
         }
 
         return $entry;
     }
 
-    public function update(array $data, string $id): array
+    protected function saveGeneral(array $data): Entry
     {
-        $entry = $this->findById($id)->update($data);
+        $data['bank_account_id'] = null;
+        $data['credit_card_id'] = null;
+        $data['parcel'] = '0';
 
-        return [
-            "message" => "Registro atualizado com sucesso",
-            "data" => $entry,
-        ];
+        return Entry::create($data);
     }
 
-    public function payday(array $data, string $id)
+    protected function getSequence(): Int
     {
-        $this->findById($id)->update($data);
+        $sequence = Entry::max('sequence');
 
-        return [
-            "status" => "success",
-            "message" => "Despesa paga com sucesso"
-        ];
+        return $sequence ? $sequence + 1 : 1;
     }
 
-    public function delete(string $id): array
+    protected function createIncome(array $data): Entry
     {
-        $entry = $this->findById($id);
+        $data['is_recurring'] = $data['is_recurring'] == '1' ? true : false;
+        $start_date = $data['start_date'];
+        $data['parcel'] = 0;
+        $data['credit_card_id'] = null;
 
-        $type = config('agenda.type_names.' . $entry->type);
+        if ($data['is_recurring'] === true) {
+            $data['sequence'] = $this->getSequence();            
+            for ($i = 1; $i <= 60; ++$i) { // 5 anos
+                $entry = Entry::create($data);
+                
+                $data['start_date'] = $start_date->copy()->addMonthNoOverflow($i);
+            }
+            
+            return Entry::where('sequence', $entry->sequence)
+                ->orderBy('id', 'ASC')
+                ->first();
+        }
 
-        $entry->delete();
+        return Entry::create($data);
+    }
 
-        return [
-            "status" => "success",
-            "message" => "$type removida com sucesso"
-        ];
+    public function show(string $id): Entry
+    {
+        return $this->find($id);
+    }
+
+    public function find(string $id): Entry
+    {
+        $entry = Entry::find((int) $id);
+
+        if (! $entry) {
+            abort(404);
+        }
+
+        return $entry;
+    }
+
+    public function update(array $data, string $id): Entry
+    {
+        $entry = $this->find($id);
+        
+        $entry->update($data);
+
+        return $entry;
+    }
+
+    public function payday(array $data, string $id): Entry
+    {
+        $entry = $this->find($id);
+
+        $entry->update($data);
+
+        return $entry;
+    }
+
+    public function delete(string $id): bool
+    {
+        $entry = $this->find($id);
+
+        return $entry->delete();
     }
 }

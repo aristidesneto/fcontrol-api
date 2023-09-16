@@ -42,7 +42,7 @@ class EntryRequest extends FormRequest
             'category_id' => ['required', new ExistsInModel(Category::class)],
             'credit_card_id' => ['nullable', new ExistsInModel(CreditCard::class)],
             'bank_account_id' => ['nullable', new ExistsInModel(BankAccount::class)],
-            'amount' => ['required', 'decimal:2'],
+            'amount' => ['required', 'regex:/^\d*(\.\d{2})?$/'],
             'due_date' => ['nullable', 'date:Y-m-d'],
             'payday' => ['nullable', 'date:Y-m-d'],
             'parcel' => ['numeric'],

@@ -27,6 +27,7 @@ class CreditCardFactory extends Factory
             'number' => $this->faker->numberBetween(1000, 9999),
             'best_date' => $best_date !== 0 ? $best_date : 1,
             'due_date' => $due_data,
+            'main_card' => false,
             'limit' => $this->faker->numberBetween(100, 10000),
         ];
     }

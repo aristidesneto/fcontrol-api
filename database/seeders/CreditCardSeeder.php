@@ -20,6 +20,13 @@ class CreditCardSeeder extends Seeder
                 ->create([
                     'user_id' => $user->id,
                 ]);
+            CreditCard::withoutGlobalScopes()
+                ->where('user_id', $user->id)
+                ->limit(1)
+                ->update([
+                    'main_card' => true
+            ]);
         }
+
     }
 }

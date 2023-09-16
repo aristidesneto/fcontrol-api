@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Aristides\Helpers\Helpers;
 use App\Tenant\Traits\TenantTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,6 +56,11 @@ class Entry extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeEntryType(Builder $query, string $type)
+    {
+        return $query->where('type', $type);
     }
 
     // public function setAmountAttribute(string $value): void

@@ -35,10 +35,14 @@ if (! function_exists('calculate_due_date')) {
 
         if ($day >= $best_date) {
             $month++;
+            if ($month > 12) {
+                $month = 1;
+                $year = $now->format('Y') + 1;
+            }
         }
         
         $next_date = Carbon::now()->tz(auth()->user()->timezone);
-        $next_date->setDate($now->format('Y'), $month, $due_date);
+        $next_date->setDate(isset($year) ? $year : $now->format('Y'), $month, $due_date);
 
         return $next_date->format('Y-m-d');        
     }

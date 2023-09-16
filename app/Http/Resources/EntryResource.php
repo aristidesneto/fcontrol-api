@@ -15,6 +15,23 @@ class EntryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if ($this->type === 'income') {
+            return [
+                'id' => $this->id,
+                'type' => $this->type,
+                'amount' => $this->amount,
+                'start_date' => is_null($this->start_date) ? null : $this->start_date->format('Y-m-d'),
+                'observation' => $this->observation,
+                'created_at' => $this->created_at,
+    
+                // Relationship
+                'category' => new CategoryResource($this->whenLoaded('category')),
+                
+                // Custom
+                'month_extension' => is_null($this->due_date) ? null : month_extension($this->due_date),
+            ];
+        }
+
         return [
             'id' => $this->id,
             'type' => $this->type,
@@ -22,15 +39,17 @@ class EntryResource extends JsonResource
             'amount' => $this->amount,
             'parcel' => $this->parcel,
             'total_parcel' => $this->total_parcel,
-            'due_date' => is_null($this->due_date) ? null : $this->due_date->format('d/m/Y'),
-            'payday' => is_null($this->payday) ? null : $this->payday->format('d/m/Y'),
+            'due_date' => is_null($this->due_date) ? null : $this->due_date->format('Y-m-d'),
+            'payday' => is_null($this->payday) ? null : $this->payday->format('Y-m-d'),
             'is_recurring' => $this->is_recurring,
-            'start_date' => is_null($this->start_date) ? null : $this->start_date->format('d/m/Y'),
-            'start_date_month' => is_null($this->start_date) ? null : $this->start_date->format('m'),
-            'start_date_year' => is_null($this->start_date) ? null : $this->start_date->format('Y'),
+            'start_date' => is_null($this->start_date) ? null : $this->start_date->format('Y-m-d'),
+            // 'start_date_month' => is_null($this->start_date) ? null : $this->start_date->format('m'),
+            // 'start_date_year' => is_null($this->start_date) ? null : $this->start_date->format('Y'),
             'sequence' => $this->sequence,
             'observation' => $this->observation,
             'created_at' => $this->created_at,
+
+            // Relationship
             'user' => new UserResource($this->whenLoaded('user')),
             'bank_account' => new BankAccountResource($this->whenLoaded('bankAccount')),
             'category' => new CategoryResource($this->whenLoaded('category')),

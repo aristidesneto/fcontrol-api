@@ -22,10 +22,10 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->integer('parcel')->nullable()->comment('Número da parcela');
             $table->integer('total_parcel')->nullable()->comment('Número total da parcela');
-            $table->datetime('due_date')->nullable()->comment('Data de vencimento');
-            $table->datetime('payday')->nullable()->comment('Data de pagamento');
+            $table->date('due_date')->nullable()->comment('Data de vencimento');
+            $table->date('payday')->nullable()->comment('Data de pagamento');
             $table->boolean('is_recurring')->default(false)->comment('Despesa recorrente');
-            $table->datetime('start_date')->nullable()->comment('Data inicial da despesa/Referência receita');
+            $table->date('start_date')->nullable()->comment('Data inicial da despesa/Referência receita');
             $table->integer('sequence')->nullable()->comment('Agrupamento de parcelas recorrentes');
             $table->string('observation')->nullable();
             $table->timestamps(6);
