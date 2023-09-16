@@ -14,15 +14,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function me(): JsonResponse
+    public function me(): UserResource
     {
         if (! Auth::check()) {
-            return response()->json(['message' => 'Usuário não autenticado'], 401);
+            abort(401);
         }
         
         $user = User::where('email', auth()->user()->email)->first();
 
-        return response()->json(['user' => new UserResource($user)], 200);
+        return new UserResource($user);
     }
 
     public function login(Request $request): JsonResponse

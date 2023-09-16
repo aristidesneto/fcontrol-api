@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Entry;
-use App\Http\Resources\EntryResource;
+use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntryService
@@ -13,6 +13,9 @@ class EntryService
         // Defaults
         $type = 'income';
         $fieldSearchDefault = 'start_date';
+
+        $data['start_period'] = Carbon::createFromFormat('Y-m', $data['start_period'])->firstOfMonth()->format('Y-m-d');
+        $data['end_period'] = Carbon::createFromFormat('Y-m', $data['end_period'])->lastOfMonth()->format('Y-m-d');
 
         if (isset($data['type']) && $data['type'] === 'expense') {
             $type = 'expense';
@@ -44,17 +47,17 @@ class EntryService
         return $this->createIncome($data);
     }
 
-    protected function createExpense(array $data)
+    protected function createExpense(array $data): Entry
     {
         if ($data['is_recurring'] === true) {
-            $this->saveRecurrent($data);
+            return $this->saveRecurrent($data);
         }
         
         if (isset($data['credit_card_id']) && ! is_null($data['credit_card_id'])) {
-            $this->saveCreditCard($data);
+            return $this->saveCreditCard($data);
         }
 
-        $this->saveGeneral($data);        
+        return $this->saveGeneral($data);        
     }
 
     protected function saveRecurrent(array $data)
@@ -75,7 +78,7 @@ class EntryService
             ->first();
     }
 
-    protected function saveCreditCard(array $data)
+    protected function saveCreditCard(array $data): Entry
     {
         $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
         $due_date = $data['due_date'];      
