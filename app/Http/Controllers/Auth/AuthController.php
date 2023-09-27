@@ -17,7 +17,7 @@ class AuthController extends Controller
     public function me(): UserResource
     {
         if (! Auth::check()) {
-            abort(401);
+            abort(401, "Não autorizado");
         }
         
         $user = User::where('email', auth()->user()->email)->first();
