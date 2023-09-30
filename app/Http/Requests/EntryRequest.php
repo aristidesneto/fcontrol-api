@@ -43,7 +43,10 @@ class EntryRequest extends FormRequest
             'credit_card_id' => ['nullable', new ExistsInModel(CreditCard::class)],
             'bank_account_id' => ['nullable', new ExistsInModel(BankAccount::class)],
             'amount' => ['required', 'regex:/^\d*(\.\d{2})?$/'],
-            'due_date' => ['nullable', 'date:Y-m-d'],
+            'due_date' => [
+                Rule::requiredIf($this->type === 'expense'), 
+                'date:Y-m-d'
+            ],
             'payday' => ['nullable', 'date:Y-m-d'],
             'parcel' => ['numeric'],
             'observation' => ['nullable', 'string', 'max:160']
@@ -54,7 +57,7 @@ class EntryRequest extends FormRequest
     {
         $this->merge([    
             'start_date' => $this->setStartDate($this->start_date),
-            'amount' => Helpers::formatMoneyToDatabase($this->amount),
+            // 'amount' => Helpers::formatMoneyToDatabase($this->amount),
             'due_date' => $this->due_date ? Carbon::createFromFormat('Y-m-d', $this->due_date) : null,
             'payday' => $this->payday ? Carbon::createFromFormat('Y-m-d', $this->payday) : null,
             'is_recurring' => $this->is_recurring == '1' ? true : false,
