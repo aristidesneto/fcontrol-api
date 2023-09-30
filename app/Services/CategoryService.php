@@ -10,8 +10,12 @@ class CategoryService
     public function list(array $data)
     {
         $paginate = $data['total_page'] ?? 10;
+        if (isset($data['sort_by'])) {
+            $key = $data['sort_by']['key'] ?? 'name';
+            $order = $data['sort_by']['order'] ?? 'asc';
+        }
         
-        $query = Category::orderBy('type')->orderby('name');
+        $query = Category::orderby($key ?? 'name', $order ?? 'asc');
 
         if (isset($data['status']) && $data['status'] !== 'all') {
             $query->where('status', $data['status']);
