@@ -9,30 +9,32 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    protected CategoryService $categoryService;
+    protected CategoryService $service;
 
     public function __construct(CategoryService $categoryService)
     {
-        $this->categoryService = $categoryService;
+        $this->service = $categoryService;
     }
 
     public function index(Request $request)
     {
-        return CategoryResource::collection($this->categoryService->list($request->all()));
+        return CategoryResource::collection($this->service->list($request->all()));
     }
 
     public function store(CategoryRequest $request)
     {
-        return response()->json($this->categoryService->store($request->all()), 201);
+        return response()->json($this->service->store($request->all()), 201);
     }
 
     public function update(CategoryRequest $request, string $id)
     {
-        return response()->json($this->categoryService->update($request->all(), (int) $id), 200);
+        return response()->json($this->service->update($request->all(), (int) $id), 200);
     }
 
     public function destroy(string $id)
     {
-        return response()->json($this->categoryService->delete((int) $id), 200);
+        $this->service->delete($id);
+
+        return response()->json([], 204);
     }
 }
