@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Entry;
 use Carbon\Carbon;
+use App\Models\Entry;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntryService
@@ -13,6 +14,7 @@ class EntryService
         // Defaults
         $type = 'income';
         $fieldSearchDefault = 'start_date';
+        $paginate = $data['total_page'] ?? 10;
 
         $data['start_period'] = Carbon::createFromFormat('Y-m', $data['start_period'])->firstOfMonth()->format('Y-m-d');
         $data['end_period'] = Carbon::createFromFormat('Y-m', $data['end_period'])->lastOfMonth()->format('Y-m-d');
@@ -25,6 +27,14 @@ class EntryService
         $query = Entry::with('category', 'creditCard')
             ->entryType($type);
 
+        // Se cartão
+        if (isset($data['credit_card_id'])) {
+            $creditCardId = $data['credit_card_id'];
+            $query->whereHas('creditCard', function (Builder $query) use ($creditCardId) {
+                $query->where('id', $creditCardId);
+            });
+        }
+
         if ($data['order_by']) {
             $arrOrderBy = explode(':', $data['order_by']);
             $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'asc' : 'desc');
@@ -33,9 +43,9 @@ class EntryService
         if ($data['start_period'] && $data['end_period']) {
             $query->whereDate($fieldSearchDefault, '>=', $data['start_period'])
                 ->whereDate($fieldSearchDefault, '<=', $data['end_period']);
-        }        
+        }
         
-        return $query->paginate();
+        return $query->paginate($paginate);
     }
 
     public function store(array $data)
