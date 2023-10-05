@@ -11,7 +11,9 @@ use App\Http\Controllers\EntryController;
 
 // public routes
 Route::post('login', [AuthController::class, 'login'])->name('login.api');
-// Route::post('register', [AuthController::class, 'register'])->name('register.api');
+Route::post('register', [AuthController::class, 'register'])->name('register.api');
+Route::get('/verify-email/{uuid}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+
 
 Route::get('authenticated/me', [AuthController::class, 'me'])->name('me.api');
 

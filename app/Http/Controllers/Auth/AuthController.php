@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Events\UserRegistered;
+use Illuminate\Validation\Rules;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,18 +65,44 @@ class AuthController extends Controller
         return response()->json([], 200)->withCookie($cookie);
     }
 
-    // private function getCookieDetails(string $token): array
-    // {
-    //     return [
-    //         'name' => 'cf_token',
-    //         'value' => $token,
-    //         'minutes' => 1440,
-    //         'path' => null,
-    //         'domain' => 'homelab.com',
-    //         'secure' => true, // for production
-    //         // 'secure' => null, // for localhost
-    //         'httponly' => false,
-    //         'samesite' => false,
-    //     ];
-    // }
+    public function register(Request $request): Response
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'uuid' => Str::uuid()->toString(),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        UserRegistered::dispatch($user);
+        // event(new Registered($user));
+
+        // Auth::login($user);
+
+        return response()->noContent();
+    }
+
+    public function verifyEmail(string $uuid)
+    {
+        $user = User::whereUuid($uuid)->first();
+
+        if (! $user) {
+            abort(404, 'Não foi possível validar seu e-mail');
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'OK'], 200);
+        }
+
+        $user->email_verified_at = now();
+        $user->save();
+
+        return new UserResource($user);
+    }
 }
