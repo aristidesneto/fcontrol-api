@@ -81,9 +81,6 @@ class AuthController extends Controller
         ]);
 
         UserRegistered::dispatch($user);
-        // event(new Registered($user));
-
-        // Auth::login($user);
 
         return response()->noContent();
     }
