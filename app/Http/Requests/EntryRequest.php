@@ -42,7 +42,7 @@ class EntryRequest extends FormRequest
             'category_id' => ['required', new ExistsInModel(Category::class)],
             'credit_card_id' => ['nullable', new ExistsInModel(CreditCard::class)],
             'bank_account_id' => ['nullable', new ExistsInModel(BankAccount::class)],
-            'amount' => ['required', 'regex:/^\d*(\.\d{2})?$/'],
+            'amount' => ['required', 'regex:/^\d*(\.\d{1,2})?$/'],
             'due_date' => [
                 Rule::requiredIf($this->type === 'expense'), 
                 'date:Y-m-d'
@@ -54,10 +54,9 @@ class EntryRequest extends FormRequest
     }
 
     protected function prepareForValidation(): void
-    {
+    {        
         $this->merge([    
             'start_date' => $this->setStartDate($this->start_date),
-            // 'amount' => Helpers::formatMoneyToDatabase($this->amount),
             'due_date' => $this->due_date ? Carbon::createFromFormat('Y-m-d', $this->due_date) : null,
             'payday' => $this->payday ? Carbon::createFromFormat('Y-m-d', $this->payday) : null,
             'is_recurring' => $this->is_recurring == '1' ? true : false,

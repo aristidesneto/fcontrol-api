@@ -78,12 +78,16 @@ class EntryService
         $data['parcel'] = 0;
         $due_date = $data['due_date'];
 
-        for ($i = 1; $i <= 60; ++$i) { // 5 anos
-            $entry = Entry::create($data);
+        $newArr = collect();
+        for ($i = 1; $i <= 60; ++$i) {        
+            $newArr->push($data);
             $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
         }
+        $user = auth()->user();
+        
+        $user->entries()->createMany($newArr->toArray());
 
-        return Entry::where('sequence', $entry->sequence)
+        return Entry::where('sequence', $data['sequence'])
             ->orderBy('id', 'ASC')
             ->first();
     }
@@ -111,9 +115,31 @@ class EntryService
 
     protected function saveGeneral(array $data): Entry
     {
+        $data['sequence'] = $this->getSequence();
         $data['bank_account_id'] = null;
         $data['credit_card_id'] = null;
-        $data['parcel'] = '0';
+        $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
+        $due_date = $data['due_date'];
+        $data['total_parcel'] = $totalParcel;
+        $amountParcel = round($data['amount'] / $totalParcel, 2);
+        $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
+
+        if ($data['parcel'] > 1) {
+            $newArr = collect();
+            for ($i = 1; $i <= $totalParcel; ++$i) {
+                $data['parcel'] = $i;
+                $data['amount'] = $i === (int) $data['parcel'] ? $amountParcel - $difference : $amountParcel;
+                $newArr->push($data);
+                $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
+            }
+            $user = auth()->user();
+        
+            $user->entries()->createMany($newArr->toArray());
+            
+            return Entry::where('sequence', $data['sequence'])
+                ->orderBy('id', 'ASC')
+                ->first();
+        }
 
         return Entry::create($data);
     }
@@ -155,7 +181,7 @@ class EntryService
 
     public function find(string $id): Entry
     {
-        $entry = Entry::find((int) $id);
+        $entry = Entry::with('creditCard', 'category')->find((int) $id);
 
         if (! $entry) {
             abort(404);
