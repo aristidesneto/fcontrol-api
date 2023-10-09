@@ -9,6 +9,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntryService
 {
+    private int $daysForRecurrence = 60;
+
     public function list(array $data): LengthAwarePaginator
     {
         // Defaults
@@ -59,8 +61,38 @@ class EntryService
 
     protected function createExpense(array $data): Entry
     {
+        // Cria despesa recorrente
         if ($data['is_recurring'] === true) {
-            return $this->saveRecurrent($data);
+            $data['bank_account_id'] = null;
+            $data['credit_card_id'] = null;
+            $data['parcel'] = 1;
+            $data['total_parcel'] = 1;
+            $due_date = $data['due_date'];
+
+            $newArr = collect();
+
+            for ($i = 1; $i <= $this->daysForRecurrence; ++$i) {        
+                $newArr->push($data);
+                $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
+            }
+            
+            $user = auth()->user();
+            
+            $entry = $user->entries()->create($newArr->first());
+            $lastId = $entry->id;
+            $entry->parent_id = $lastId;
+            $entry->save();
+
+            $newData = $newArr->map(function ($item) use ($lastId) {
+                $item['parent_id'] = $lastId;
+                return $item;
+            });
+
+            $newData->forget(0);
+            
+            $user->entries()->createMany($newData->toArray());
+
+            return $entry;
         }
         
         if (isset($data['credit_card_id']) && ! is_null($data['credit_card_id'])) {
@@ -70,78 +102,83 @@ class EntryService
         return $this->saveGeneral($data);        
     }
 
-    protected function saveRecurrent(array $data)
-    {
-        $data['sequence'] = $this->getSequence();
-        $data['bank_account_id'] = null;
-        $data['credit_card_id'] = null;
-        $data['parcel'] = 0;
-        $due_date = $data['due_date'];
-
-        $newArr = collect();
-        for ($i = 1; $i <= 60; ++$i) {        
-            $newArr->push($data);
-            $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
-        }
-        $user = auth()->user();
-        
-        $user->entries()->createMany($newArr->toArray());
-
-        return Entry::where('sequence', $data['sequence'])
-            ->orderBy('id', 'ASC')
-            ->first();
-    }
-
     protected function saveCreditCard(array $data): Entry
     {
-        $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
-        $due_date = $data['due_date'];      
-        $amountParcel = round($data['amount'] / $totalParcel, 2);
-        $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
-
-        $data['total_parcel'] = $totalParcel;
+        $data['total_parcel'] = $data['parcel'];
         $data['bank_account_id'] = null;
+        $due_date = $data['due_date'];      
+        
+        $amountParcel = round($data['amount'] / $data['total_parcel'], 2);
+        $difference = round(($amountParcel * $data['total_parcel']) - $data['amount'], 2);
 
-        for ($i = 1; $i <= $totalParcel; ++$i) {
+        $newArr = collect();
+
+        for ($i = 1; $i <= $data['total_parcel']; ++$i) {
             $data['parcel'] = $i;
-            $data['amount'] = $i === (int) $totalParcel ? $amountParcel - $difference : $amountParcel;
-
-            $entry = Entry::create($data);
+            $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;
+            $newArr->push($data);    
             $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
         }
+
+        $user = auth()->user();
+
+        $entry = $user->entries()->create($newArr->first());
+        $lastId = $entry->id;
+        $entry->parent_id = $lastId;
+        $entry->save();
+
+        $newData = $newArr->map(function ($item) use ($lastId) {
+            $item['parent_id'] = $lastId;
+            return $item;
+        });
+
+        $newData->forget(0);
+
+        $user->entries()->createMany($newData->toArray());
 
         return $entry;
     }
 
     protected function saveGeneral(array $data): Entry
     {
-        $data['sequence'] = $this->getSequence();
         $data['bank_account_id'] = null;
         $data['credit_card_id'] = null;
-        $totalParcel = ($data['parcel'] === null || $data['parcel'] === '0') ? '1' : $data['parcel'];
-        $due_date = $data['due_date'];
-        $data['total_parcel'] = $totalParcel;
-        $amountParcel = round($data['amount'] / $totalParcel, 2);
-        $difference = round(($amountParcel * $totalParcel) - $data['amount'], 2);
+        $data['total_parcel'] = $data['parcel'];
 
+        $user = auth()->user();
+        
         if ($data['parcel'] > 1) {
+            $due_date = $data['due_date'];
+            $amountParcel = round($data['amount'] / $data['total_parcel'], 2);
+            $difference = round(($amountParcel * $data['total_parcel']) - $data['amount'], 2);
+
             $newArr = collect();
-            for ($i = 1; $i <= $totalParcel; ++$i) {
+            for ($i = 1; $i <= $data['total_parcel']; ++$i) {
                 $data['parcel'] = $i;
-                $data['amount'] = $i === (int) $data['parcel'] ? $amountParcel - $difference : $amountParcel;
+                $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;
                 $newArr->push($data);
                 $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
-            }
-            $user = auth()->user();
-        
-            $user->entries()->createMany($newArr->toArray());
+            }    
             
-            return Entry::where('sequence', $data['sequence'])
-                ->orderBy('id', 'ASC')
-                ->first();
+            $entry = $user->entries()->create($newArr->first());
+            $lastId = $entry->id;
+            $entry->parent_id = $lastId;
+            $entry->save();
+
+            $newData = $newArr->map(function ($item) use ($lastId) {
+                $item['parent_id'] = $lastId;
+                return $item;
+            });
+
+            $newData->forget(0);
+
+            $user->entries()->createMany($newData->toArray());
+            
+        
+            return $entry;
         }
 
-        return Entry::create($data);
+        return $user->entries()->create($data);
     }
 
     protected function getSequence(): Int
@@ -193,19 +230,54 @@ class EntryService
     public function update(array $data, string $id): Entry
     {
         $entry = $this->find($id);
-        
+
+        // Verificar se foi alterado o total de parcelas para recalcular o valor de cada parcela
+        if ($data['total_parcel'] > 1) {
+            $data['sequence'] = $entry->sequence;
+            $due_date = $data['due_date'];
+            $amountParcel = round($data['amount'] / $data['total_parcel'], 2);
+            $difference = round(($amountParcel * $data['total_parcel']) - $data['amount'], 2);
+
+            $newArr = collect();
+            for ($i = 1; $i <= $data['total_parcel']; ++$i) {
+                $data['parcel'] = $i;
+                $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;                
+                $newArr->push($data);
+                $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
+            }
+
+            // dd($newArr->forget(0));
+            // Atualiza o ID primario da despesa
+            $entry->update($newArr->first());
+            $newArr->forget(0);
+
+            // Cria novos registros com as novas parcelas
+            $user = auth()->user();
+            $user->entries()->createMany($newArr->toArray());
+
+            return $entry;
+        }
+
         $entry->update($data);
 
         return $entry;
     }
 
-    public function payday(array $data, string $id): Entry
+    public function payday(array $data, string $id): int
     {
+        if (isset($data['reference'])) {
+            $arr = explode("-", $data['reference']);   
+            return Entry::where('credit_card_id', (int) $id)
+                ->whereMonth('due_date', $arr[1])
+                ->whereYear('due_date', $arr[0])
+                ->update([
+                    'payday' => $data['payday']
+                ]);
+        }
+
         $entry = $this->find($id);
 
-        $entry->update($data);
-
-        return $entry;
+        return $entry->update($data);
     }
 
     public function delete(string $id): bool

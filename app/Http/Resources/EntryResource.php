@@ -42,10 +42,8 @@ class EntryResource extends JsonResource
             'due_date' => is_null($this->due_date) ? null : $this->due_date->format('Y-m-d'),
             'payday' => is_null($this->payday) ? null : $this->payday->format('Y-m-d'),
             'is_recurring' => $this->is_recurring,
+            'parent_id' => $this->parent_id,
             'start_date' => is_null($this->start_date) ? null : $this->start_date->format('Y-m-d'),
-            // 'start_date_month' => is_null($this->start_date) ? null : $this->start_date->format('m'),
-            // 'start_date_year' => is_null($this->start_date) ? null : $this->start_date->format('Y'),
-            'sequence' => $this->sequence,
             'observation' => $this->observation,
             'created_at' => $this->created_at,
 

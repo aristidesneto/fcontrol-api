@@ -41,7 +41,9 @@ class EntryController extends Controller
 
     public function payday(EntryPaydayRequest $request, string $id)
     {
-        return response()->json($this->service->payday($request->only(['payday', 'observation']), $id), 200);
+        $this->service->payday($request->only(['payday', 'observation', 'reference']), $id);
+
+        return response()->json([], 200);
     }
 
     public function destroy(string $id)

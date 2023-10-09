@@ -27,11 +27,4 @@ class EntryPaydayRequest extends FormRequest
             'observation' => ['nullable', 'string', 'max:160']
         ];
     }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([    
-            'payday' => $this->payday ? Carbon::createFromFormat('d/m/Y', $this->payday) : null,
-        ]);
-    }
 }

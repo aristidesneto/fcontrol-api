@@ -14,23 +14,7 @@ class Entry extends Model
 {
     use HasFactory, TenantTrait;
 
-    protected $fillable = [
-        'user_id',
-        'category_id',
-        'credit_card_id',
-        'bank_account_id',
-        'type',
-        'title',
-        'amount',
-        'parcel',
-        'total_parcel',
-        'due_date',
-        'payday',
-        'is_recurring',
-        'start_date',
-        'sequence',
-        'observation'
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'due_date' => 'date',
