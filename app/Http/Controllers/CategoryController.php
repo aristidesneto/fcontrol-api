@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\CategoryStoreUpdateRequest;
 use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
@@ -16,19 +16,28 @@ class CategoryController extends Controller
         $this->service = $categoryService;
     }
 
+    public function all(Request $request)
+    {
+        return CategoryResource::collection($this->service->all($request->all()));
+    }
+
     public function index(Request $request)
     {
         return CategoryResource::collection($this->service->list($request->all()));
     }
 
-    public function store(CategoryRequest $request)
+    public function store(CategoryStoreUpdateRequest $request)
     {
-        return response()->json($this->service->store($request->all()), 201);
+        $category = $this->service->store($request->all());
+
+        return (new CategoryResource($category))->response()->setStatusCode(201);
     }
 
-    public function update(CategoryRequest $request, string $id)
+    public function update(CategoryStoreUpdateRequest $request, string $id)
     {
-        return response()->json($this->service->update($request->all(), (int) $id), 200);
+        $category = $this->service->update($request->all(), $id);
+
+        return response()->json($category);
     }
 
     public function destroy(string $id)

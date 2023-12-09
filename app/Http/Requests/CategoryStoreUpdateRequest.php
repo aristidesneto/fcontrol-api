@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CategoryRequest extends FormRequest
+class CategoryStoreUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +26,7 @@ class CategoryRequest extends FormRequest
         return [
             'name' => 'required|max:120',
             'color' => 'required|size:7',
-            'type' => ['required', Rule::in(config('agenda.types'))],
+            'type' => ['required', Rule::in(Category::listTypes())],
             'status' => 'required|boolean',
         ];
     }

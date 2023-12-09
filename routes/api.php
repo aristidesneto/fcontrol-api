@@ -20,7 +20,9 @@ Route::get('authenticated/me', [AuthController::class, 'me'])->name('me.api');
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('bank-accounts', BankAccountController::class);
+    Route::get('categories/all', [CategoryController::class, 'all'])->name('categories.all');
     Route::apiResource('categories', CategoryController::class);
+
     Route::apiResource('credit-cards', CreditCardController::class);
     Route::apiResource('entries', EntryController::class);
     Route::put('entries/payday/{id}', [EntryController::class, 'payday']);

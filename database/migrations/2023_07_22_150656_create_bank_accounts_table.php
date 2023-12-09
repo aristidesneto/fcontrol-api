@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->decimal('balance', 10, 2)->nullable()->comment('Saldo bancário');
-            $table->timestamps(6);
+            $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')

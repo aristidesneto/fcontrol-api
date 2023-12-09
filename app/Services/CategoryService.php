@@ -3,70 +3,92 @@
 namespace App\Services;
 
 use App\Models\Category;
-use App\Http\Resources\CategoryResource;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 class CategoryService
 {
-    public function list(array $data)
+    protected $paginate = Category::PAGINATE;
+
+    public function all(array $data): Collection
     {
-        $paginate = $data['total_page'] ?? 10;
-        if (isset($data['sort_by'])) {
-            $key = $data['sort_by']['key'] ?? 'name';
-            $order = $data['sort_by']['order'] ?? 'asc';
-        }
-        
-        $query = Category::orderby($key ?? 'name', $order ?? 'asc');
+        // $data['type'] = 'all';
 
-        if (isset($data['status']) && $data['status'] !== 'all') {
-            $query->where('status', $data['status']);
-        }
-
-        if (isset($data['type']) && $data['type'] !== 'all') {
-            $type = $data['type'] === 'expense' ? 'expense' : 'income';
-            $query->where('type', $type);
-        }
-
-        if (isset($data['paginate']) && $data['paginate'] == false) {
-            return $query->get();
-        }
-
-        return $query->paginate($paginate);
+        return $this->queryApi($data)
+            ->get();
     }
 
-    public function store(array $data): array
+    public function list(array $data): LengthAwarePaginator
+    {
+        $paginate = Arr::get($data, 'total_page', $this->paginate);
+
+        return $this->queryApi($data)
+            ->paginate($paginate);
+    }
+
+    protected function queryApi(?array $data = []): Builder
+    {
+        $key = Arr::get($data, 'sort_by.key', 'name');
+        $order = Arr::get($data, 'sort_by.order', 'asc');
+        
+        $query = Category::orderby($key, $order);
+
+        $status = Arr::get($data, 'status');
+
+        $type = Arr::get($data, 'type');
+
+        if (! in_array($type, array_merge(Category::listTypes(), ['all']))) {
+            abort(422, 'Type invalid');
+        }
+
+        $query->when(
+            $status !== null,
+            fn ($query) => $query->where('status', $status)
+        );
+
+        $query->when(
+            $type !== 'all',
+            fn ($query) => $query->where('type', $type)
+        );
+
+        return $query;
+    }
+
+    public function store(array $data): Category
     {
         $category = Category::create($data);
 
-        return [
-            "message" => "Categoria cadastrada com sucesso",
-            "data" => new CategoryResource($category)
-        ];
+        return $category;
     }
 
-    public function update(array $data, int $id): array
+    public function update(array $data, string $id): Category
     {
-        $data['status'] = boolval($data['status']);
+        $category = $this->find($id);
 
-        $category = Category::where('id', $id)->first()->update($data);
+        $category->update($data);
 
-        return [
-            "message" => "Categoria atualizada com sucesso",
-            "data" => $category,
-        ];
+        return $category;
     }
 
     public function delete(string $id): ?bool
     {
-        $category = Category::with('entries')->find((int) $id);
-
-        if (! $category) {
-            abort(404, "Registro não encontrado");
-        }
-
+        $category = $this->find($id); 
+        
         if ($category->entries->count() > 0) {
             abort(422, "Erro! Essa categoria não pode ser removida, pois está sendo usada em um lançamento");            
         }
 
         return $category->delete();
+    }
+
+    public function find(string $id): Category
+    {
+        $category = Category::find((int) $id);
+        
+        abort_if($category === null, 404);
+
+        return $category;
     }
 }

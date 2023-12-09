@@ -13,12 +13,14 @@ class Category extends Model
 {
     use HasFactory, TenantTrait;
 
+    public const PAGINATE = '15';
+
+    public const TYPE_INCOME = 'income';
+
+    public const TYPE_EXPENSE = 'expense';
+
     protected $fillable = [
-        'user_id',
-        'name',
-        'color',
-        'type',
-        'status'
+        'user_id', 'name', 'color', 'type', 'status'
     ];
 
     public function user(): BelongsTo
@@ -29,5 +31,13 @@ class Category extends Model
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
+    }
+
+    public static function listTypes(): array
+    {
+        return [
+            self::TYPE_EXPENSE,
+            self::TYPE_INCOME
+        ]; 
     }
 }

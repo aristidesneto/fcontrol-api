@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('color');
             $table->enum('type', ['income', 'expense'])->default('income');
-            $table->boolean('status');
-            $table->timestamps(6);
+            $table->boolean('status')->default(1);
+            $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('limit', 10, 2);
             $table->boolean('status')->default(true);
             $table->boolean('main_card')->default(false);
-            $table->timestamps(6);
+            $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')

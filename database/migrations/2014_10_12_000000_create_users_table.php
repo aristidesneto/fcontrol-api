@@ -21,11 +21,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('avatar')->nullable();
             $table->boolean('status')->default(true);
-            $table->timestamp('email_verified_at', 6)->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 100);
             $table->string('timezone', 100)->nullable();
             $table->rememberToken();
-            $table->timestamps(6);
+            $table->timestamps();
         });
     }
 

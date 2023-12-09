@@ -29,7 +29,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id')->nullable()->comment('ID do registro pai');
             $table->integer('sequence')->nullable()->comment('Agrupamento de parcelas recorrentes');
             $table->string('observation')->nullable();
-            $table->timestamps(6);
+            $table->timestamps();
 
             $table->foreign('user_id')
                 ->references('id')
