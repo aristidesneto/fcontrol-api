@@ -1,6 +1,4 @@
-version: '3'
 services:
-
   app:
     build:
       args:
@@ -20,7 +18,7 @@ services:
     image: mysql:8.0
     container_name: fcontrol-api-db
     ports:
-      - '3309:3306'
+      - "3309:3306"
     environment:
       - TZ=America/Sao_Paulo
       - MYSQL_ROOT_PASSWORD=root
@@ -29,7 +27,7 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     volumes:
-      - './docker/mysql/data:/var/lib/mysql'
+      - "./docker/mysql/data:/var/lib/mysql"
     networks:
       - api
 
@@ -47,4 +45,3 @@ services:
 networks:
   api:
     driver: bridge
-
