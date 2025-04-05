@@ -44,8 +44,8 @@ class EntryRequest extends FormRequest
             'bank_account_id' => ['nullable', new ExistsInModel(BankAccount::class)],
             'amount' => ['required', 'regex:/^\d*(\.\d{1,2})?$/'],
             'due_date' => [
-                Rule::requiredIf($this->type === 'expense'), 
-                'date:Y-m-d'
+                Rule::requiredIf($this->type === 'expense'),
+                'exclude_if:type,income|date:Y-m-d'
             ],
             'payday' => ['nullable', 'date:Y-m-d'],
             'parcel' => ['numeric'],
@@ -54,8 +54,8 @@ class EntryRequest extends FormRequest
     }
 
     protected function prepareForValidation(): void
-    {        
-        $this->merge([    
+    {
+        $this->merge([
             'start_date' => $this->setStartDate($this->start_date),
             'due_date' => $this->due_date ? Carbon::createFromFormat('Y-m-d', $this->due_date) : null,
             'payday' => $this->payday ? Carbon::createFromFormat('Y-m-d', $this->payday) : null,
@@ -72,7 +72,7 @@ class EntryRequest extends FormRequest
         if (is_array($value) && Arr::exists($value, 'year') && Arr::exists($value, 'month')) {
             return Carbon::createFromFormat('Y-m', $value['year'] . '-' . $value['month'])->firstOfMonth();
         }
-        
-        return Carbon::createFromFormat('Y-m-d', $value);        
+
+        return Carbon::createFromFormat('Y-m-d', $value);
     }
 }

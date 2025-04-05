@@ -16,7 +16,7 @@ class EntryController extends Controller
     {
         $this->service = $service;
     }
-    
+
     public function index(Request $request)
     {
         return EntryResource::collection($this->service->list($request->all()));

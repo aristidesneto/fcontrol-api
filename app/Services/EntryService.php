@@ -4,27 +4,35 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use App\Models\Entry;
+use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntryService
 {
     private int $daysForRecurrence = 60;
 
-    public function list(array $data): LengthAwarePaginator
+    public function list(array $data): Collection|LengthAwarePaginator
     {
         // Defaults
         $type = 'income';
         $fieldSearchDefault = 'start_date';
         $paginate = $data['total_page'] ?? 10;
 
-        $data['start_period'] = Carbon::createFromFormat('Y-m', $data['start_period'])->firstOfMonth()->format('Y-m-d');
-        $data['end_period'] = Carbon::createFromFormat('Y-m', $data['end_period'])->lastOfMonth()->format('Y-m-d');
+        $start_dt = Carbon::now();
+        $end_dt = Carbon::now();
+
+        // dd($start_dt, $end_dt);
+
+        $data['start_period'] = Carbon::createFromFormat('Y-m', Arr::get($data, 'start_period', $start_dt->subMonths(12)->format('Y-m')))->firstOfMonth()->format('Y-m-d');
+        $data['end_period'] = Carbon::createFromFormat('Y-m', Arr::get($data, 'end_period', $end_dt->format('Y-m')))->lastOfMonth()->format('Y-m-d');
+
 
         if (isset($data['type']) && $data['type'] === 'expense') {
             $type = 'expense';
             $fieldSearchDefault = 'due_date';
-        }        
+        }
 
         $query = Entry::with('category', 'creditCard')
             ->entryType($type);
@@ -42,11 +50,15 @@ class EntryService
             $query->orderBy($arrOrderBy[1], $arrOrderBy[0] === '-' ? 'asc' : 'desc');
         }
 
+        if ($type === 'income') {
+            return $query->limit(14)->get();
+        }
+
         if ($data['start_period'] && $data['end_period']) {
             $query->whereDate($fieldSearchDefault, '>=', $data['start_period'])
                 ->whereDate($fieldSearchDefault, '<=', $data['end_period']);
         }
-        
+
         return $query->paginate($paginate);
     }
 
@@ -71,13 +83,13 @@ class EntryService
 
             $newArr = collect();
 
-            for ($i = 1; $i <= $this->daysForRecurrence; ++$i) {        
+            for ($i = 1; $i <= $this->daysForRecurrence; ++$i) {
                 $newArr->push($data);
                 $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
             }
-            
+
             $user = auth()->user();
-            
+
             $entry = $user->entries()->create($newArr->first());
             $lastId = $entry->id;
             $entry->parent_id = $lastId;
@@ -89,25 +101,25 @@ class EntryService
             });
 
             $newData->forget(0);
-            
+
             $user->entries()->createMany($newData->toArray());
 
             return $entry;
         }
-        
-        if (isset($data['credit_card_id']) && ! is_null($data['credit_card_id'])) {
+
+        if (isset($data['credit_card_id']) && !is_null($data['credit_card_id'])) {
             return $this->saveCreditCard($data);
         }
 
-        return $this->saveGeneral($data);        
+        return $this->saveGeneral($data);
     }
 
     protected function saveCreditCard(array $data): Entry
     {
         $data['total_parcel'] = $data['parcel'];
         $data['bank_account_id'] = null;
-        $due_date = $data['due_date'];      
-        
+        $due_date = $data['due_date'];
+
         $amountParcel = round($data['amount'] / $data['total_parcel'], 2);
         $difference = round(($amountParcel * $data['total_parcel']) - $data['amount'], 2);
 
@@ -116,7 +128,7 @@ class EntryService
         for ($i = 1; $i <= $data['total_parcel']; ++$i) {
             $data['parcel'] = $i;
             $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;
-            $newArr->push($data);    
+            $newArr->push($data);
             $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
         }
 
@@ -146,7 +158,7 @@ class EntryService
         $data['total_parcel'] = $data['parcel'];
 
         $user = auth()->user();
-        
+
         if ($data['parcel'] > 1) {
             $due_date = $data['due_date'];
             $amountParcel = round($data['amount'] / $data['total_parcel'], 2);
@@ -158,8 +170,8 @@ class EntryService
                 $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;
                 $newArr->push($data);
                 $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
-            }    
-            
+            }
+
             $entry = $user->entries()->create($newArr->first());
             $lastId = $entry->id;
             $entry->parent_id = $lastId;
@@ -173,15 +185,15 @@ class EntryService
             $newData->forget(0);
 
             $user->entries()->createMany($newData->toArray());
-            
-        
+
+
             return $entry;
         }
 
         return $user->entries()->create($data);
     }
 
-    protected function getSequence(): Int
+    protected function getSequence(): int
     {
         $sequence = Entry::max('sequence');
 
@@ -196,13 +208,13 @@ class EntryService
         $data['credit_card_id'] = null;
 
         if ($data['is_recurring'] === true) {
-            $data['sequence'] = $this->getSequence();            
+            $data['sequence'] = $this->getSequence();
             for ($i = 1; $i <= 60; ++$i) { // 5 anos
                 $entry = Entry::create($data);
-                
+
                 $data['start_date'] = $start_date->copy()->addMonthNoOverflow($i);
             }
-            
+
             return Entry::where('sequence', $entry->sequence)
                 ->orderBy('id', 'ASC')
                 ->first();
@@ -220,7 +232,7 @@ class EntryService
     {
         $entry = Entry::with('creditCard', 'category')->find((int) $id);
 
-        if (! $entry) {
+        if (!$entry) {
             abort(404);
         }
 
@@ -241,7 +253,7 @@ class EntryService
             $newArr = collect();
             for ($i = 1; $i <= $data['total_parcel']; ++$i) {
                 $data['parcel'] = $i;
-                $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;                
+                $data['amount'] = $i === (int) $data['total_parcel'] ? $amountParcel - $difference : $amountParcel;
                 $newArr->push($data);
                 $data['due_date'] = $due_date->copy()->addMonthNoOverflow($i);
             }
@@ -266,7 +278,7 @@ class EntryService
     public function payday(array $data, string $id): int
     {
         if (isset($data['reference'])) {
-            $arr = explode("-", $data['reference']);   
+            $arr = explode("-", $data['reference']);
             return Entry::where('credit_card_id', (int) $id)
                 ->whereMonth('due_date', $arr[1])
                 ->whereYear('due_date', $arr[0])

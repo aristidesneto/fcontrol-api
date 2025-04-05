@@ -2,15 +2,17 @@
 
 namespace App\Providers;
 
-use App\Database\Query\Grammars\MySqlGrammar;
+use Carbon\Carbon;
 use App\Models\Entry;
 use App\Models\Category;
 use App\Models\CreditCard;
 use App\Observers\EntryObserver;
-use App\Observers\CategoryObserver;
-use App\Observers\CreditCardObserver;
 use Illuminate\Support\Facades\DB;
+use App\Observers\CategoryObserver;
+use Illuminate\Support\Facades\Auth;
+use App\Observers\CreditCardObserver;
 use Illuminate\Support\ServiceProvider;
+use App\Database\Query\Grammars\MySqlGrammar;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,8 +35,18 @@ class AppServiceProvider extends ServiceProvider
             CreditCard::observe(CreditCardObserver::class);
         }
 
+        // if (Auth::check()) {
+        //     $timezone = auth()->user()->timezone;
+
+        //     // Defina o fuso horário padrão sempre que Carbon for instanciado
+        //     Carbon::macro('setDefaultTimeZone', function () {
+        //         return static::setToStringFormat($timezone)
+        //         ->setTimezone($timezone);
+        //     });
+        // }
+
         // Schema::defaultStringLength(191);
-        
+
         DB::connection()->setQueryGrammar(new MySqlGrammar);
     }
 }

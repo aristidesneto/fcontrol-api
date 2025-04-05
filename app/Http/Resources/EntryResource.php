@@ -23,12 +23,13 @@ class EntryResource extends JsonResource
                 'start_date' => is_null($this->start_date) ? null : $this->start_date->format('Y-m-d'),
                 'observation' => $this->observation,
                 'created_at' => $this->created_at,
-    
+
                 // Relationship
                 'category' => new CategoryResource($this->whenLoaded('category')),
-                
+
                 // Custom
-                'month_extension' => is_null($this->due_date) ? null : month_extension($this->due_date),
+                'month_extension' => is_null($this->due_date) ? month_extension($this->start_date) : month_extension($this->due_date),
+                'year' => is_null($this->start_date) ? null : $this->start_date->format('Y'),
             ];
         }
 
@@ -52,7 +53,7 @@ class EntryResource extends JsonResource
             'bank_account' => new BankAccountResource($this->whenLoaded('bankAccount')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'credit_card' => new CreditCardResource($this->whenLoaded('creditCard')),
-            
+
             // Custom
             // 'amount_sum' => $this->amount_sum ? Helpers::formatMoneyToReal($this->amount_sum) : null,
             'month_extension' => is_null($this->due_date) ? null : month_extension($this->due_date),
